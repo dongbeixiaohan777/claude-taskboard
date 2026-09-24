@@ -1,16 +1,35 @@
 {
-  "name": "vscode-taskboard",
-  "displayName": "任务面板",
-  "description": "侧边栏任务面板：02-项目看板 + Claude Code 会话时间线",
+  "name": "claude-taskboard",
+  "displayName": "Claude Taskboard",
+  "description": "A sidebar panel for your projects and Claude Code sessions: see what's alive, where your time went, and jump back to any past conversation.",
   "version": "0.1.0",
-  "publisher": "local",
-  "private": true,
+  "publisher": "dongbeixiaohan777",
+  "license": "MIT",
+  "private": false,
+  "icon": "media/icon-128.png",
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "taskboard",
+    "sessions",
+    "projects",
+    "dashboard",
+    "kanban"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dongbeixiaohan777/claude-taskboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dongbeixiaohan777/claude-taskboard/issues"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": [
-    "Other"
-  ],
   "main": "./src/extension.js",
   "activationEvents": [
     "onView:taskboard.main"
@@ -25,7 +44,7 @@
       "activitybar": [
         {
           "id": "taskboard",
-          "title": "任务面板",
+          "title": "Claude Taskboard",
           "icon": "media/icon.svg"
         }
       ]
@@ -35,21 +54,21 @@
         {
           "type": "webview",
           "id": "taskboard.main",
-          "name": "任务面板"
+          "name": "Claude Taskboard"
         }
       ]
     },
     "commands": [
       {
         "command": "taskboard.refresh",
-        "title": "刷新",
-        "category": "任务面板",
+        "title": "Refresh",
+        "category": "Claude Taskboard",
         "icon": "$(refresh)"
       },
       {
         "command": "taskboard.toggle",
-        "title": "切换看板 / 列表",
-        "category": "任务面板",
+        "title": "Toggle Board / List",
+        "category": "Claude Taskboard",
         "icon": "$(list-unordered)"
       }
     ],
@@ -68,7 +87,7 @@
       ]
     },
     "configuration": {
-      "title": "任务面板",
+      "title": "Claude Taskboard",
       "properties": {
         "taskboard.glassEffect": {
           "type": "string",
@@ -78,17 +97,17 @@
             "off"
           ],
           "enumDescriptions": [
-            "只在深色主题下启用玻璃质感（浅色主题保持扁平）",
-            "任何主题都启用玻璃质感",
-            "关闭玻璃质感，始终使用扁平样式"
+            "Enable the glass effect only with dark themes.",
+            "Enable the glass effect with every theme.",
+            "Disable the glass effect and always use the flat style."
           ],
           "default": "auto",
-          "markdownDescription": "面板的液态玻璃质感。\n\n**auto**（默认）——玻璃需要「透出背后的东西」才好看。深色主题底色暗，透出的层次感强；浅色主题是一整片浅灰，玻璃只会把白卡片的清爽对比糊掉。所以默认按主题自动切换。\n\n改完立即生效，不用重载窗口。"
+          "markdownDescription": "The panel's liquid glass effect.\n\n**auto** (default) — glass works best when it reveals content behind the panel. Dark themes provide stronger depth, while light themes can reduce the contrast between white cards and the background. This mode follows the active theme.\n\nChanges apply immediately; no reload is needed."
         },
         "taskboard.projectsDir": {
           "type": "string",
           "default": "",
-          "markdownDescription": "项目文档目录。留空则自动使用当前工作区下的 `KB/02-项目`。"
+          "markdownDescription": "Project documentation folder. Leave blank to automatically detect a common location in the current workspace, such as `KB/02-项目`, `projects`, or `docs/projects`."
         }
       }
     }

@@ -26,7 +26,7 @@ test('项目扫描解析状态、递归文件数和 README 摘要', async (t) =>
 
   const completed = projects.find((project) => project.dirName === '语音输入助手-已完成');
   assert.strictEqual(completed.name, '语音输入助手');
-  assert.strictEqual(completed.status, '已完成');
+  assert.strictEqual(completed.status, 'live');
   assert.strictEqual(completed.docCount, 2);
   assert.strictEqual(completed.summary, '这是项目摘要。');
   assert.ok(completed.mtimeMs > 0);
@@ -38,4 +38,17 @@ test('项目扫描解析状态、递归文件数和 README 摘要', async (t) =>
   assert.strictEqual(unmarked.docCount, 1);
   assert.strictEqual(unmarked.readmePath, null);
   assert.strictEqual(unmarked.summary, null);
+});
+
+test('项目状态识别英文后缀并忽略大小写', async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'taskboard-project-status-'));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  await fs.mkdir(path.join(root, 'MyApp-Planning'));
+  await fs.mkdir(path.join(root, 'MyApp-DONE'));
+  await fs.mkdir(path.join(root, 'MyApp-in-progress'));
+
+  const projects = await scanProjects(root);
+  assert.strictEqual(projects.find((project) => project.dirName === 'MyApp-Planning').status, 'plan');
+  assert.strictEqual(projects.find((project) => project.dirName === 'MyApp-DONE').status, 'live');
+  assert.strictEqual(projects.find((project) => project.dirName === 'MyApp-in-progress').status, 'dev');
 });

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!--
+  README / 市场截图页 —— 用 demo-data.js 的中性演示数据，不随扩展发布。
+  不带任何沙盘工具栏，拍的图直接能用。
+
+  用法：?theme=dark|light&view=board|list&locale=en|zh-cn&glass=auto|on|off
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>shot</title>
+<link rel="stylesheet" href="../media/style.css">
+<link rel="stylesheet" href="../media/glass.css">
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; }
+  /* 拍成仿 VS Code 侧边栏的样子：固定宽度、铺满高度 */
+  .frame {
+    width: 320px; height: 900px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    background: var(--c-bg);
+  }
+  .frame .app { flex: 1; min-height: 0; position: relative; }
+
+  /* Quiet Light 真实色值 */
+  body.vscode-light {
+    --vscode-foreground: #333333; --vscode-descriptionForeground: #717171;
+    --vscode-sideBar-background: #F2F2F2; --vscode-widget-border: #d4d4d4;
+    --vscode-list-hoverBackground: #e0e0e0; --vscode-focusBorder: #9769dc;
+    --vscode-button-background: #705697; --vscode-button-foreground: #ffffff;
+    --vscode-button-hoverBackground: #8a6cb0;
+    --vscode-button-secondaryBackground: #dcdcdc;
+    --vscode-button-secondaryForeground: #333333;
+    --vscode-button-secondaryHoverBackground: #cfcfcf;
+  }
+  /* Dark Modern 真实色值 */
+  body.vscode-dark {
+    --vscode-foreground: #CCCCCC; --vscode-descriptionForeground: #9d9d9d;
+    --vscode-sideBar-background: #181818; --vscode-widget-border: #313131;
+    --vscode-list-hoverBackground: #2a2d2e; --vscode-focusBorder: #0078d4;
+    --vscode-button-background: #0078d4; --vscode-button-foreground: #ffffff;
+    --vscode-button-hoverBackground: #026ec1;
+    --vscode-button-secondaryBackground: #313131;
+    --vscode-button-secondaryForeground: #CCCCCC;
+    --vscode-button-secondaryHoverBackground: #3c3c3c;
+  }
+</style>
+</head>
+<body>
+  <div class="frame"><div class="app" id="app"></div></div>
+
+<script src="demo-data.js"></script>
+<script src="../media/i18n.js"></script>
+<script src="../media/views.js"></script>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var theme  = q.get('theme')  || 'light';
+  var view   = q.get('view')   || 'board';
+  var locale = q.get('locale') || 'en';
+  var glass  = q.get('glass')  || 'auto';
+
+  document.body.className = 'vscode-' + theme;
+
+  if (window.initI18n) window.initI18n(locale);
+
+  var isDark = theme === 'dark';
+  var glassOn = glass === 'on' || (glass === 'auto' && isDark);
+  if (glassOn) document.body.classList.add('glass-on');
+
+  document.getElementById('app').innerHTML =
+    window.renderApp(makeDemo(locale), view);
+})();
+</script>
+</body>
+</html>

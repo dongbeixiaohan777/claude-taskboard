@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!--
+  图标渲染页 —— 仅供生成 media/icon-128.png 用，不随扩展发布。
+  VS Code 市场要求扩展图标为 128×128 PNG。
+  用浏览器渲染保证与 media/icon.svg 是同一条路径产出的矢量。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>icon render</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; background: transparent;
+    width: 128px; height: 128px; overflow: hidden;
+  }
+  .tile {
+    width: 128px; height: 128px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 26px;
+    background: linear-gradient(145deg, #7c5cc4 0%, #4b3a72 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  /* 顶边高光 —— 和面板卡片同一套语言 */
+  .tile::before {
+    content: ''; position: absolute; inset: 0 0 auto 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  }
+  .tile svg { width: 74px; height: 74px; color: #fff; display: block; }
+</style>
+</head>
+<body>
+  <div class="tile">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <rect x="3"    y="11"   width="4.6" height="10"   rx="2.3"/>
+      <rect x="9.7"  y="3"    width="4.6" height="18"   rx="2.3"/>
+      <rect x="16.4" y="14.5" width="4.6" height="6.5"  rx="2.3"/>
+    </svg>
+  </div>
+</body>
+</html>

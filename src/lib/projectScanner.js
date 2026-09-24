@@ -3,12 +3,21 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const PROJECT_STATUSES = new Set(['规划中', '开发中', '已上线', '已完成', '已归档']);
+const STATUS_ALIASES = {
+  '规划中': 'plan', planning: 'plan', plan: 'plan',
+  '开发中': 'dev', active: 'dev', 'in-progress': 'dev', wip: 'dev', inprogress: 'dev',
+  '已上线': 'live', '已完成': 'live', done: 'live', shipped: 'live', complete: 'live', completed: 'live',
+  '已归档': 'arch', archived: 'arch', archive: 'arch'
+};
+const STATUS_SUFFIXES = Object.keys(STATUS_ALIASES).sort((a, b) => b.length - a.length);
 
 function parseProjectName(dirName) {
-  const match = dirName.match(/-([^-]+)$/);
-  if (match && PROJECT_STATUSES.has(match[1])) {
-    return { name: dirName.slice(0, match.index), status: match[1] };
+  const lowerName = dirName.toLowerCase();
+  for (const suffix of STATUS_SUFFIXES) {
+    const marker = `-${suffix.toLowerCase()}`;
+    if (lowerName.endsWith(marker)) {
+      return { name: dirName.slice(0, -marker.length), status: STATUS_ALIASES[suffix] };
+    }
   }
   return { name: dirName, status: null };
 }

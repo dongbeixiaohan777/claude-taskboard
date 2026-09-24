@@ -1,208 +1,223 @@
-# 任务面板 · vscode-taskboard
+# Claude Taskboard
 
-VS Code 侧边栏面板。把**项目文档**和 **Claude Code 会话**集中到一处，
-解决「21 个会话跨 2 个月，找不到上次聊到哪」和「文档在 KB、代码在 projects，两处分开」这两件事。
+A sidebar panel for **Claude Code sessions** and **project folders**.
 
-只读工具 —— **不会修改你的任何文件**。
+It answers two questions that get harder the longer you use Claude Code:
 
----
+- **Where did I leave off?** You have 40 sessions and no idea which one had that answer.
+- **What's still alive?** Your projects are scattered across folders, some active, some long dead.
 
-## 界面
+Everything is local. No account, no network calls, no telemetry.
 
-活动栏（左侧最窄那条竖栏）最下方有一个图标，点开就是面板。三块内容：
-
-1. **统计条** —— 项目数 / 会话数 / 本周提问数
-2. **工作脉搏** —— 最近 8 周每周的提问数。空白的周会留一根极淡的基线，
-   让「那周什么都没干」也看得见。这是面板的签名元素
-3. **项目 / 会话** —— 项目支持「看板」「列表」两种视图切换；会话是时间线，节点大小 = 提问数
-
-配色跟随 VS Code 主题自动切换明暗，不写死任何颜色。
+![Screenshot](docs/screenshot-board.png)
 
 ---
 
-## 设置
+## Features
 
-| 设置项 | 默认 | 说明 |
-|---|---|---|
-| `taskboard.glassEffect` | `auto` | 液态玻璃质感的开关 |
-| `taskboard.projectsDir` | 空 | 项目文档目录；留空则用工作区下的 `KB/02-项目` |
+### Sessions, as a timeline
 
-### `taskboard.glassEffect` 的三个取值
+Every Claude Code conversation in your workspace, newest first. Node size encodes how many
+prompts the session had, so the heavy ones stand out.
 
-- **`auto`（默认）** —— 深色主题用玻璃，浅色主题用扁平
-- **`on`** —— 任何主题都开玻璃
-- **`off`** —— 始终扁平
+- **Click a session** → opens a preview: the first prompt plus the last three replies.
+- **Click the speech-bubble button** → reopens that conversation inside the Claude Code
+  extension. No terminal, no copy-pasting session IDs.
 
-**为什么默认是 auto**：玻璃的观感来自「透出背后的东西」。深色主题底色暗，
-环境光透出来的层次感强；浅色主题是一整片浅灰，玻璃层会把「白卡片浮在灰底上」
-的清爽对比糊掉。实测两种主题下结论不同，所以默认按主题自动切。
+### The work pulse
 
-在 VS Code 里改：`Ctrl + ,` 打开设置 → 搜「任务面板」→ 改完**立即生效，不用重载窗口**。
+A strip at the top showing your prompt count for each of the last 8 weeks.
 
-> 高对比主题（High Contrast）会自动排除玻璃 —— 半透明会削弱对比度，伤害可访问性。
-> 系统级「减少动态效果」开启时，玻璃的模糊也会自动关闭。
+Weeks where you did nothing stay visible as a faint baseline rather than disappearing.
+If you only get a few hours a week, that rhythm is the most useful thing on the panel —
+and it's invisible everywhere else.
 
----
+### Projects, as a board or a list
 
-## 安装
+Reads a folder of project directories. Status is encoded in the **folder-name suffix**:
 
-### 方式一：直接挂载（推荐，无需手动操作）
-
-扩展以目录联接（junction）方式挂到 VS Code 的扩展目录，改代码后只需重载窗口：
-
-```powershell
-# 以管理员或普通用户身份运行（junction 不需要管理员）
-cmd /c mklink /J "%USERPROFILE%\.vscode\extensions\local.vscode-taskboard-0.1.0" "D:\Claude\projects\vscode-taskboard"
+```
+my-app-active        → In progress   (orange spine)
+my-app-planning      → Planning      (blue spine)
+my-app-done          → Shipped       (green spine)
+my-app-archived      → Archived      (grey spine)
+some-folder          → Unlabeled     (yellow spine)
 ```
 
-然后**重启 VS Code**。
+Chinese status words work too — see [Project folders](#project-folders) below.
 
-==卸载==：删掉 `%USERPROFILE%\.vscode\extensions\local.vscode-taskboard-0.1.0` 这个联接即可。
+### Glass, on dark themes
 
-### 方式二：从文件夹安装（图形界面）
+On dark themes the panel uses a translucent "liquid glass" treatment. On light themes it
+stays flat and crisp, because glass over a flat pale background just looks muddy.
+Override with `taskboard.glassEffect` if you disagree.
 
-1. `Ctrl + Shift + P` 打开命令面板
-2. 输入 `Install Extension from Location`
-3. 点第一项 → 在弹出的文件夹选择框顶部的**地址栏**粘贴
-   `D:\Claude\projects\vscode-taskboard` → 回车 → 点「选择文件夹」
-4. 提示重新加载时点 **「重新加载窗口」**
-5. 看活动栏**最下面**是否出现新图标
+---
 
-### 方式三：打包成 .vsix
+## Install
+
+**From the marketplace:** search for **Claude Taskboard** in the Extensions view.
+
+**From a VSIX:**
 
 ```bash
-npm install
+code --install-extension claude-taskboard-0.1.0.vsix
+```
+
+**From source:**
+
+```bash
+git clone https://github.com/dongbeixiaohan777/claude-taskboard.git
+cd claude-taskboard
 npx @vscode/vsce package --allow-missing-repository
+code --install-extension claude-taskboard-0.1.0.vsix
 ```
-然后命令面板 → `Extensions: Install from VSIX...` → 选生成的 `.vsix`。
 
-### 图标位置说明（重要）
+Restart VS Code. The icon appears at the **bottom** of the activity bar.
 
-VS Code **没有**提供「把扩展图标钉到活动栏底部」的 API。实测行为是：
-
-- **首次安装时**图标会出现在活动栏**最下方**，就在账户和设置齿轮正上方
-- 如果之后**又装了别的**带活动栏图标的扩展，那个会排到你下面
-- 想固定位置：**鼠标按住图标拖到底部松手**，VS Code 会记住，跨重启保留
-
-「账户」和「设置」两个按钮永远是最后两个，任何扩展都排不到它们下面 —— 这是 VS Code 的硬限制。
+> **On icon position:** VS Code has no API to pin a contributed view container to the
+> bottom. Newly installed extensions land last, which puts the icon above the account and
+> settings buttons — the closest to the bottom that's reachable. If another extension with
+> an activity-bar icon is installed later, it will land below this one. Drag to reorder;
+> VS Code remembers.
 
 ---
 
-## 使用
+## Settings
 
-| 操作 | 结果 |
-|---|---|
-| 点项目卡片 | 打开该项目的 `README.md` |
-| 点卡片上的 ↗ 按钮 | 在资源管理器中定位该项目文件夹 |
-| 点会话条目 | 弹出预览抽屉：首条提问 + 最后 3 条回复 |
-| 点会话上的 💬 按钮 | **在 Claude Code 扩展里恢复这个会话**（不是开终端） |
-| 顶栏「看板 / 列表」 | 切换项目区的呈现方式，选择会被记住 |
-| 命令面板 `任务面板：刷新` | 强制重扫 |
-| 命令面板 `任务面板：切换看板 / 列表` | 同顶栏切换 |
+| Setting | Default | Description |
+|---|---|---|
+| `taskboard.projectsDir` | *(empty)* | Folder containing your project directories. Empty = auto-detect. |
+| `taskboard.glassEffect` | `auto` | `auto` (glass on dark themes only) · `on` · `off` |
 
-面板会自动跟随文件变化刷新（去抖 1.5 秒）。
+### Auto-detection of `taskboard.projectsDir`
 
-> **预览不需要装 Claude 扩展**，它只读 `.jsonl` 文件。
-> 但「恢复会话」需要 Claude Code 扩展在场，没装的话按钮会变成安装提示。
+When the setting is empty, the panel looks for the first of these that exists, relative to
+your workspace root:
 
----
+```
+KB/02-项目          projects/          docs/projects/          taskboard/
+```
 
-## 数据从哪来
-
-### 项目 —— `D:\Claude\KB\02-项目\`
-
-状态编码在**目录名后缀**里（`项目名-状态`）。每个项目卡片显示状态、文档数、最后修改时间、README 摘要。
-
-⚠️ 解析器**同时接受规范内和规范外的状态词**，因为实际数据里两者都有：
-
-| 词 | 来源 |
-|---|---|
-| `规划中` / `开发中` / `已归档` | 符合 `KB/02-项目/README.md` 的规范 |
-| `已完成` | **不在规范里**，但实际在用（`语音输入助手-已完成`） |
-| `已上线` | 规范里有，实际暂未使用，一并支持 |
-| 无后缀 | 归入「未标注」，**不丢弃**（如 `漫剧测试片`） |
-
-### 会话 —— `%USERPROFILE%\.claude\projects\<工作区编码名>\*.jsonl`
-
-**不猜目录名的编码规则**（`d:\Claude` → `d--Claude` 只是观察到的现象，不是契约）。
-实际做法是遍历该根目录下的所有子目录，读 `jsonl` 里的 `cwd` 字段反查真实工作区路径 —— 
-即使 Claude Code 改了编码实现也依然正确。
-
-**提问计数口径**（用真实数据校准过，21 个会话合计 142 条）：
-
-| 记录形态 | 处理 |
-|---|---|
-| 正常文本 | ✅ 计入 |
-| `<task-notification>` | ❌ 排除（系统生成的后台任务通知） |
-| `<command-name>` / `<command-message>` 等 | ❌ 排除（斜杠命令调用，不算提问） |
-| `<ide_opened_file>…</ide_opened_file>开工` | ⚠️ **剥掉标签，保留「开工」** —— 整条丢弃会丢真实提问 |
-| `[Image: …]` | ❌ 排除（实测全部带 `isMeta`） |
-| 含 `tool_result` 的记录 | ❌ 排除（工具返回值，不是提问） |
-
-**标题**取三级回退：`ai-title`（取最后一条，标题会演化）→ `custom-title`（用户手动改名）
-→ 首条真实提问截断 → `(空会话)`。
-
-**时间戳**对全部带 timestamp 的行排序取 min/max —— 实测存在乱序条目，
-取首行/末行会算错。
+Nothing found? The projects section just shows an empty state — the sessions section still
+works. Set the setting explicitly to point anywhere.
 
 ---
 
-## 开发
+## How it finds your data
+
+**Sessions** are read from `~/.claude/projects/<encoded-workspace>/`. The panel does *not*
+guess the encoding rule — it walks that folder and matches each candidate directory against
+the `cwd` field recorded inside its `.jsonl` files. That survives changes to how the folder
+name is derived.
+
+**Prompt counts** exclude system-generated noise:
+
+| Record | Counted? |
+|---|---|
+| A normal typed message | yes |
+| `<task-notification>` (background task notices) | no |
+| `<command-name>` and friends (slash-command invocations) | no |
+| `<ide_opened_file>…</ide_opened_file>fix the bug` | yes — the tag is stripped, `fix the bug` counts |
+| Tool results and `isMeta` records | no |
+
+Parsing is streaming, so multi-megabyte session files won't blow up memory.
+
+**Timestamps** are taken as min/max over every timestamped record rather than first/last
+line — some files contain out-of-order entries from resumes and queued messages.
+
+---
+
+## Project folders
+
+Point `taskboard.projectsDir` at a folder whose subdirectories are your projects. The panel
+reads each one's `README.md` (first non-heading line becomes the card summary) and shows a
+document count.
+
+Status comes from the folder name suffix. These words are recognized, case-insensitively:
+
+| Status | Accepted suffixes |
+|---|---|
+| Planning | `planning`, `plan`, `规划中` |
+| In progress | `active`, `in-progress`, `wip`, `开发中` |
+| Shipped | `done`, `shipped`, `complete`, `completed`, `已上线`, `已完成` |
+| Archived | `archived`, `archive`, `已归档` |
+
+No recognized suffix → **Unlabeled**. The folder is still shown, never dropped.
+
+---
+
+## Requirements
+
+- VS Code **1.85** or newer.
+- For **reopening sessions**, the [Claude Code](https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code)
+  extension. Without it, previews still work — the panel just hides the reopen button.
+
+---
+
+## Privacy
+
+The extension reads local files and renders them. It makes no network requests, sends no
+telemetry, and never writes to your sessions or project files. The only thing it writes is
+a scan cache in VS Code's own extension storage.
+
+---
+
+## Known limitations
+
+- **Reopening sessions** uses a command from the Claude Code extension
+  (`claude-vscode.editor.open`) plus a public deep link
+  (`vscode://anthropic.claude-code/open?session=…`). The deep link is the fallback if the
+  command ever changes. If both break, previews still work.
+- **Slash commands don't count as prompts.** If you run `/my-command` and then type the
+  actual request, counting both would double the same intent.
+- **The panel is read-only.** No creating, editing, or reordering from inside it.
+
+---
+
+## Development
 
 ```bash
-node --test test/*.test.js    # 单元测试，零依赖，用 Node 内置测试框架
-node test/smoke.mjs           # 真机冒烟：扫真实的 .claude/projects 并打印表格
+node --test test/*.test.js    # unit tests, zero dependencies, Node's built-in runner
+node test/smoke.mjs           # scan your real ~/.claude/projects and print a table
 ```
 
-改完代码后：命令面板 → `Reload Window`。
+After editing, run `Reload Window` from the command palette.
 
-### 目录结构
+### Layout
 
 ```
-src/extension.js       激活入口，纯装配
-src/store.js           唯一数据源：扫描 + 缓存 + 事件
-src/panel.js           WebviewViewProvider（CSP / nonce / 消息协议）
-src/claude.js          Claude 扩展集成（★ 最易随对方版本失效的一处）
-src/watcher.js         文件监听 + 去抖 + 兜底轮询
-src/cache.js           扫描结果落盘缓存（原子写）
-src/logger.js          输出通道「任务面板」
-src/lib/               纯 Node，不 require('vscode')，可单测
-  ├─ jsonl.js          单行解析 + 噪音判定
-  ├─ sessionScanner.js 会话扫描（流式，24MB 文件不爆内存）
-  ├─ projectScanner.js 项目扫描
-  ├─ paths.js          路径推导 + cwd 反查
-  └─ format.js         格式化
-media/                 webview 前端
-  ├─ style.css         设计系统（明暗自适应，改颜色只改这里）
-  ├─ views.js          渲染
-  └─ main.js           交互与消息
-dev/preview.html       设计沙盘：本地静态服务打开可看成品，用于视觉迭代
-docs/                  给 Codex 的任务书（含逆向得到的接口事实）
+src/extension.js       activation, wiring
+src/store.js           single source of truth: scan + cache + events
+src/panel.js           webview host (CSP, nonce, message protocol)
+src/claude.js          Claude Code integration — the one piece tied to another extension
+src/watcher.js         file watching, debounce, fallback polling
+src/cache.js           on-disk scan cache (atomic writes)
+src/i18n.js            strings (extension side)
+src/lib/               pure Node, no vscode import, unit-testable
+media/                 webview: style.css, glass.css, i18n.js, views.js, main.js
+dev/preview.html       design sandbox — open it in a browser to iterate on visuals
+docs/                  briefs handed to the coding agent that wrote most of this
 ```
 
-### 两条刻意的偏离
+### Two deliberate deviations
 
-1. **不写 `"type": "module"`。** 本仓库其他项目是 ESM，但 VS Code 扩展宿主里
-    ESM 会让 `require('vscode')` 报 `require is not defined`。所以这里用 CommonJS。
-2. **零构建步骤。** 没有 TypeScript、没有打包器。代价是没有类型检查，
-   缓解手段是 `src/lib/` 那一层不依赖 `vscode`，可以纯 Node 单测。
+1. **CommonJS, not ESM.** An extension host will throw `require is not defined` on
+   `require('vscode')` under ESM.
+2. **No build step.** No TypeScript, no bundler. The tradeoff is no type checking; the
+   mitigation is that `src/lib/` never imports `vscode`, so it's directly testable.
 
-### 主题变量必须挂在 `body` 而不是 `:root`
+### Theme tokens must live on `body`, not `:root`
 
-`--vscode-*` 由 VS Code 在运行时注入（落在 `body` 上）。若把
-`--c-bg: var(--vscode-sideBar-background)` 这类派生令牌定义在 `:root`，
-解析时取不到 `body` 上的值，会**静默回落到兜底值** —— 表现为「切主题完全没反应」。
-这是个真踩过的坑。
+VS Code injects `--vscode-*` variables at runtime on `body`. Deriving tokens like
+`--c-bg: var(--vscode-sideBar-background)` on `:root` silently falls back to the hardcoded
+default, which looks like "theming is broken" — everything renders in one theme's colors
+regardless of what you pick. Cost me an afternoon.
 
 ---
 
-## 已知限制
+## License
 
-- **Claude 集成基于 `anthropic.claude-code` 2.1.281 逆向**。用到了内部命令
-  `claude-vscode.editor.open(sessionId, …)` 和公开深链
-  `vscode://anthropic.claude-code/open?session=<id>`。
-  对方升级后若失效，`src/claude.js` 顶部的常量改一行即可，且有深链兜底。
-- **活动栏位置**受 VS Code 限制，见上文「图标位置说明」。
-- **会话计数口径**：斜杠命令（`/money` 等）不计入提问数。
-  这是刻意选择 —— 用户在同一条会话里通常还会发真实需求，都算会重复计数。
-- 面板是**只读**的，不支持在面板里新建/编辑任何东西。
+MIT — see [LICENSE](LICENSE).
+
+[简体中文](README.zh-CN.md)

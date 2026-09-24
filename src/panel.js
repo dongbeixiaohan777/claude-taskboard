@@ -6,6 +6,7 @@ const path = require('node:path');
 const vscode = require('vscode');
 const claude = require('./claude');
 const logger = require('./logger');
+const i18n = require('./i18n');
 
 class TaskboardViewProvider {
   constructor(context, store) {
@@ -31,7 +32,7 @@ class TaskboardViewProvider {
       webviewView.webview.onDidReceiveMessage((message) => {
         void this.handleMessage(message).catch((error) => {
           logger.error('处理面板消息失败', error);
-          this.toast('操作没有完成，请稍后重试。', 'error');
+          this.toast(i18n.t('toast.genericError'), 'error');
         });
       }),
       webviewView.onDidChangeVisibility(() => {
@@ -70,7 +71,7 @@ class TaskboardViewProvider {
     const result = await claude.openSession(id);
     if (result.ok) return;
     if (result.reason === 'not-installed') {
-      this.toast('尚未安装 Claude Code 扩展，正在打开扩展页面。', 'info');
+      this.toast(i18n.t('toast.claudeNotInstalled'), 'info');
       // 用 vscode:extension/ 让 VS Code 内部打开扩展页；不要用网页市场链接，
       // 国内访问 marketplace.visualstudio.com 很慢，且会跳出编辑器。
       try {
@@ -82,7 +83,7 @@ class TaskboardViewProvider {
       }
       return;
     }
-    this.toast('Claude Code 暂时无法打开这个会话。', 'error');
+    this.toast(i18n.t('toast.claudeOpenFailed'), 'error');
   }
 
   async previewSession(id) {
@@ -90,13 +91,13 @@ class TaskboardViewProvider {
     try {
       const payload = await this.store.readPreview(id);
       if (!payload) {
-        this.toast('找不到这个会话，请刷新后重试。', 'error');
+        this.toast(i18n.t('toast.sessionNotFound'), 'error');
         return;
       }
       this.postMessage({ type: 'preview', payload });
     } catch (error) {
       logger.error('读取会话预览失败', error);
-      this.toast('暂时无法读取会话预览。', 'error');
+      this.toast(i18n.t('toast.previewFailed'), 'error');
     }
   }
 
@@ -111,7 +112,7 @@ class TaskboardViewProvider {
       await vscode.window.showTextDocument(document);
     } catch (error) {
       logger.error('打开项目 README 失败', error);
-      this.toast('这个项目还没有可打开的 README.md。', 'info');
+      this.toast(i18n.t('toast.noReadme'), 'info');
     }
   }
 
@@ -121,7 +122,7 @@ class TaskboardViewProvider {
       await vscode.commands.executeCommand('revealInExplorer', vscode.Uri.file(targetPath));
     } catch (error) {
       logger.error('在资源管理器中定位项目失败', error);
-      this.toast('暂时无法在资源管理器中定位这个目录。', 'error');
+      this.toast(i18n.t('toast.revealFailed'), 'error');
     }
   }
 
@@ -156,6 +157,9 @@ class TaskboardViewProvider {
     const glassUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.context.extensionUri, 'media', 'glass.css')
     );
+    const i18nUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this.context.extensionUri, 'media', 'i18n.js')
+    );
     const viewsUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.context.extensionUri, 'media', 'views.js')
     );
@@ -171,7 +175,7 @@ class TaskboardViewProvider {
     ].join('; ');
 
     return `<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="${i18n.getLocale() === 'zh-cn' ? 'zh-CN' : 'en'}">
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="${csp}">
@@ -179,10 +183,12 @@ class TaskboardViewProvider {
 <link rel="stylesheet" href="${cssUri}">
 <!-- 液态玻璃层：只在深色主题下生效，浅色保持扁平。规则见 glass.css 顶部注释 -->
 <link rel="stylesheet" href="${glassUri}">
-<title>任务面板</title>
+<title>${i18n.getLocale() === 'zh-cn' ? '任务面板' : 'Taskboard'}</title>
 </head>
 <body>
   <div id="root"></div>
+  <script nonce="${nonce}">window.__LOCALE__=${JSON.stringify(i18n.getLocale())}</script>
+  <script nonce="${nonce}" src="${i18nUri}"></script>
   <script nonce="${nonce}" src="${viewsUri}"></script>
   <script nonce="${nonce}" src="${jsUri}"></script>
 </body>

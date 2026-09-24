@@ -71,7 +71,7 @@ function startWatching(store, isVisible) {
     try {
       if (!projectsWatched) {
         // 同 store.js：必须走 resolveProjectsDir，不能依赖 get() 的 fallback
-        const projectsDir = paths.resolveProjectsDir(
+        const projectsDir = await paths.resolveProjectsDir(
           workspaceRoot,
           vscode.workspace.getConfiguration('taskboard').get('projectsDir')
         );

@@ -4,10 +4,10 @@
   加载的是 media/style.css 本体（同一份文件），所以这里看到的就是最终效果。
   主题变量取自 VS Code 内置 Quiet Light 主题的真实色值。
 -->
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>任务面板 · 设计沙盘</title>
+<title>Taskboard · Preview</title>
 <link rel="stylesheet" href="../media/style.css">
 <link rel="stylesheet" href="../media/glass.css">
 <style>
@@ -79,16 +79,19 @@
   <button data-t="vscode-light" class="on">Quiet Light</button>
   <button data-t="vscode-dark">Dark</button>
   <span style="width:1px;background:#444;margin:0 4px"></span>
-  <button data-g="auto" class="on">玻璃 auto</button>
-  <button data-g="on">强制开</button>
-  <button data-g="off">关</button>
-  <button id="cmp">并排对比</button>
+  <button data-g="auto" class="on">Glass auto</button>
+  <button data-g="on">Force on</button>
+  <button data-g="off">Off</button>
+  <button id="cmp">Compare</button>
 </div>
 
 <script src="preview-data.js"></script>
+<script src="../media/i18n.js"></script>
 <script src="../media/views.js"></script>
 <script>
 (function () {
+  var queryLocale = new URLSearchParams(window.location.search).get('lang');
+  if (queryLocale) window.initI18n(queryLocale);
   document.getElementById('app').innerHTML = window.renderApp(DATA, 'board');
   document.getElementById('app2').innerHTML = window.renderApp(DATA, 'list');
 

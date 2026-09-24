@@ -2,6 +2,8 @@
 (function () {
   'use strict';
 
+  window.initI18n(window.__LOCALE__);
+  const T = window.T;
   const vscode = acquireVsCodeApi();
   const root = document.getElementById('root');
   let state = null;
@@ -57,8 +59,8 @@
       node.style.setProperty('--i', String(index));
       node.dataset.empty = count ? '0' : '1';
       node.dataset.now = index === 7 ? '1' : '0';
-      node.title = count + ' 次提问';
-      node.setAttribute('aria-label', '第 ' + (index + 1) + ' 周：' + count + ' 次提问');
+      node.title = T('pulse.tip', count);
+      node.setAttribute('aria-label', T('pulse.weekAria', index + 1, count));
     });
   }
 
@@ -84,7 +86,7 @@
         claudeNotice = document.createElement('div');
         claudeNotice.className = 'notice';
         claudeNotice.id = 'claude-notice';
-        claudeNotice.textContent = '未检测到 Claude Code 扩展，只能预览、无法恢复会话。';
+        claudeNotice.textContent = T('notice.noClaude');
       }
       const sessions = root.querySelector('#sessions-section');
       if (sessions && claudeNotice.nextElementSibling !== sessions) stage.insertBefore(claudeNotice, sessions);
@@ -127,7 +129,7 @@
       summary.remove();
     }
     updateMeta(node.querySelector('.card__m'), [
-      (Number(project.docCount) || 0) + ' 份文档', null, project.ago || ''
+      T('unit.docs', Number(project.docCount) || 0), null, project.ago || ''
     ]);
     node.dataset.id = projectId(project);
     setStyle(node, '--st', statusColor(project.status));
@@ -136,7 +138,7 @@
 
   function syncProjectRow(node, project, index) {
     node.querySelector('.row__t').textContent = project.name || '';
-    node.querySelector('.row__m').textContent = (Number(project.docCount) || 0) + ' 份 · ' + (project.ago || '');
+    node.querySelector('.row__m').textContent = T('unit.docsShort', Number(project.docCount) || 0) + ' · ' + (project.ago || '');
     node.dataset.id = projectId(project);
     setStyle(node, '--st', statusColor(project.status));
     setStyle(node, '--i', String(Math.min(index, 12)));
@@ -158,7 +160,7 @@
     dot.className = 'lane__dot';
     const name = document.createElement('span');
     name.className = 'lane__name';
-    name.textContent = status || '未标注';
+    name.textContent = window.statusLabel(status);
     const count = document.createElement('span');
     count.className = 'lane__n';
     count.textContent = '0';
@@ -260,11 +262,11 @@
   }
 
   function syncSessionNode(node, session, index, installed) {
-    const title = session.title || '(空会话)';
+    const title = session.title || T('session.untitled');
     const titleNode = node.querySelector('.tl__t');
     titleNode.textContent = title;
     titleNode.title = title;
-    const parts = [session.ago || '', (Number(session.promptCount) || 0) + ' 次提问'];
+    const parts = [session.ago || '', T('unit.prompts', Number(session.promptCount) || 0)];
     if (session.branch) parts.push(session.branch);
     updateMeta(node.querySelector('.tl__m'), parts);
     node.dataset.id = session.id;
@@ -276,7 +278,7 @@
     const actions = node.querySelector('.card__act');
     let openButton = actions.querySelector('[data-act="open"]');
     if (installed && !openButton) {
-      openButton = makeActionButton('open', session.id, '在 Claude 中打开',
+      openButton = makeActionButton('open', session.id, T('action.openInClaude'),
         '<svg viewBox="0 0 16 16"><path d="M13.5 8.5c0 2.5-2.5 4.5-5.5 4.5-.7 0-1.4-.1-2-.3L3 14l1-2.3C3.4 10.9 2.5 9.8 2.5 8.5 2.5 6 5 4 8 4s5.5 2 5.5 4.5z"/></svg>');
       actions.appendChild(openButton);
     } else if (!installed && openButton) {
@@ -395,13 +397,13 @@
   function openPreview(payload) {
     const drawer = root.querySelector('#drawer');
     const meta = payload.meta || {};
-    root.querySelector('.drawer__t').textContent = payload.title || '(空会话)';
+    root.querySelector('.drawer__t').textContent = payload.title || T('session.untitled');
     const details = [];
     if (meta.ago) details.push(meta.ago);
-    details.push((Number(meta.promptCount) || 0) + ' 次提问');
+    details.push(T('unit.prompts', Number(meta.promptCount) || 0));
     if (meta.branch) details.push(meta.branch);
     appendMetaValues(root.querySelector('.drawer__m'), details);
-    root.querySelector('.quote').textContent = payload.firstPrompt || '没有可显示的真实提问。';
+    root.querySelector('.quote').textContent = payload.firstPrompt || T('drawer.noPrompt');
 
     const body = root.querySelector('.drawer__body');
     Array.from(body.children).slice(1).forEach((node) => node.remove());
@@ -409,7 +411,7 @@
     if (!values.length) {
       const empty = document.createElement('div');
       empty.className = 'empty__d';
-      empty.textContent = '没有可显示的助手回复。';
+      empty.textContent = T('drawer.noReplies');
       body.appendChild(empty);
     } else {
       values.forEach((reply) => {

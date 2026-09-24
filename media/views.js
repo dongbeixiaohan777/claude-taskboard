@@ -3,15 +3,15 @@
   'use strict';
 
   var STATUS_META = {
-    '规划中': { css: 'var(--st-plan)', order: 0 },
-    '开发中': { css: 'var(--st-dev)', order: 1 },
-    '已上线': { css: 'var(--st-live)', order: 2 },
-    '已完成': { css: 'var(--st-live)', order: 2 },
-    '已归档': { css: 'var(--st-arch)', order: 3 }
+    plan: { css: 'var(--st-plan)', order: 0 },
+    dev: { css: 'var(--st-dev)', order: 1 },
+    live: { css: 'var(--st-live)', order: 2 },
+    arch: { css: 'var(--st-arch)', order: 3 }
   };
   var STATUS_NONE = { css: 'var(--st-none)', order: 4 };
 
   function statusMeta(status) { return STATUS_META[status] || STATUS_NONE; }
+  function statusLabel(status) { return status && STATUS_META[status] ? T('status.' + status) : T('status.none'); }
 
   function escapeHtml(value) {
     return String(value == null ? '' : value)
@@ -39,17 +39,17 @@
   function renderStats(data) {
     var stats = data.stats || {};
     return '<div class="stats">' +
-      '<div class="stat"><span class="stat__n">' + (Number(stats.projectCount) || 0) + '</span><span class="stat__l">项目</span></div>' +
-      '<div class="stat"><span class="stat__n">' + (Number(stats.sessionCount) || 0) + '</span><span class="stat__l">会话</span></div>' +
-      '<div class="stat stat--hot"><span class="stat__n">' + (Number(stats.weekCount) || 0) + '</span><span class="stat__l">本周</span></div>' +
+      '<div class="stat"><span class="stat__n">' + (Number(stats.projectCount) || 0) + '</span><span class="stat__l">' + T('stat.projects') + '</span></div>' +
+      '<div class="stat"><span class="stat__n">' + (Number(stats.sessionCount) || 0) + '</span><span class="stat__l">' + T('stat.sessions') + '</span></div>' +
+      '<div class="stat stat--hot"><span class="stat__n">' + (Number(stats.weekCount) || 0) + '</span><span class="stat__l">' + T('stat.week') + '</span></div>' +
       '</div>';
   }
 
   function renderSeg(view) {
     var boardOn = view !== 'list';
-    return '<div class="seg" data-i="' + (boardOn ? '0' : '1') + '" role="tablist" aria-label="视图切换">' +
-      '<button class="seg__btn' + (boardOn ? ' is-on' : '') + '" data-view="board" role="tab" aria-selected="' + boardOn + '">看板</button>' +
-      '<button class="seg__btn' + (!boardOn ? ' is-on' : '') + '" data-view="list" role="tab" aria-selected="' + !boardOn + '">列表</button>' +
+    return '<div class="seg" data-i="' + (boardOn ? '0' : '1') + '" role="tablist" aria-label="' + T('view.toggle') + '">' +
+      '<button class="seg__btn' + (boardOn ? ' is-on' : '') + '" data-view="board" role="tab" aria-selected="' + boardOn + '">' + T('view.board') + '</button>' +
+      '<button class="seg__btn' + (!boardOn ? ' is-on' : '') + '" data-view="list" role="tab" aria-selected="' + !boardOn + '">' + T('view.list') + '</button>' +
       '<span class="seg__thumb" aria-hidden="true"></span></div>';
   }
 
@@ -58,8 +58,8 @@
     return '<article class="card" data-id="' + escapeHtml(projectId(project)) + '" style="--st:' + meta.css + ';--i:' + Math.min(index, 12) + '">' +
       '<div class="card__t" title="' + escapeHtml(project.name) + '">' + escapeHtml(project.name) + '</div>' +
       (project.summary ? '<div class="card__d">' + escapeHtml(project.summary) + '</div>' : '') +
-      '<div class="card__m"><span>' + (Number(project.docCount) || 0) + ' 份文档</span><span class="dot"></span><span>' + escapeHtml(project.ago) + '</span></div>' +
-      '<div class="card__act"><button class="card__btn" data-act="docs" title="打开项目文档">' + ICON.open + '</button></div>' +
+      '<div class="card__m"><span>' + T('unit.docs', Number(project.docCount) || 0) + '</span><span class="dot"></span><span>' + escapeHtml(project.ago) + '</span></div>' +
+      '<div class="card__act"><button class="card__btn" data-act="docs" title="' + T('action.docs') + '">' + ICON.open + '</button></div>' +
       '</article>';
   }
 
@@ -68,7 +68,7 @@
     return '<div class="row" data-id="' + escapeHtml(projectId(project)) + '" style="--st:' + meta.css + ';--i:' + Math.min(index, 12) + '">' +
       '<span class="row__dot"></span>' +
       '<span class="row__t">' + escapeHtml(project.name) + '</span>' +
-      '<span class="row__m">' + (Number(project.docCount) || 0) + ' 份 · ' + escapeHtml(project.ago) + '</span>' +
+      '<span class="row__m">' + T('unit.docsShort', Number(project.docCount) || 0) + ' · ' + escapeHtml(project.ago) + '</span>' +
       '</div>';
   }
 
@@ -77,7 +77,7 @@
     projects.forEach(function (project) {
       var key = project.status || '__none';
       var meta = statusMeta(project.status);
-      if (!buckets[key]) buckets[key] = { label: project.status || '未标注', css: meta.css, order: meta.order, items: [] };
+      if (!buckets[key]) buckets[key] = { label: statusLabel(project.status), css: meta.css, order: meta.order, items: [] };
       buckets[key].items.push(project);
     });
 
@@ -103,10 +103,10 @@
   function renderProjectSection(data, view) {
     var projects = Array.isArray(data.projects) ? data.projects : [];
     var content = !projects.length
-      ? '<div class="empty"><div class="empty__t">暂无项目</div><div class="empty__d">检查项目目录设置，或在 02-项目目录中添加项目文件夹。</div></div>'
+      ? '<div class="empty"><div class="empty__t">' + T('empty.projects.title') + '</div><div class="empty__d">' + T('empty.projects.desc') + '</div></div>'
       : (view === 'list' ? renderProjectList(projects) : renderBoard(projects));
     return '<section class="section" id="project-section"><div class="section__head">' +
-      '<h2 class="section__title">项目</h2><span class="section__count" id="project-count">' + projects.length + '</span>' +
+      '<h2 class="section__title">' + T('section.projects') + '</h2><span class="section__count" id="project-count">' + projects.length + '</span>' +
       renderSeg(view) + '</div>' + content + '</section>';
   }
 
@@ -115,26 +115,26 @@
     while (pulse.length < 8) pulse.unshift(0);
     var counts = pulse.map(function (value) { return Math.max(0, Number(value) || 0); });
     var max = Math.max.apply(null, counts.concat([1]));
-    return '<div class="pulse" aria-label="最近八周提问数"><div class="pulse__bars">' +
+    return '<div class="pulse" aria-label="' + T('pulse.aria') + '"><div class="pulse__bars">' +
       counts.map(function (count, index) {
         var height = count === 0 ? 0 : Math.max(0.08, count / max).toFixed(3);
-        return '<span class="pulse__b" style="--h:' + height + ';--i:' + index + '" data-empty="' + (count ? '0' : '1') + '" data-now="' + (index === 7 ? '1' : '0') + '" title="' + count + ' 次提问" aria-label="第 ' + (index + 1) + ' 周：' + count + ' 次提问"></span>';
+        return '<span class="pulse__b" style="--h:' + height + ';--i:' + index + '" data-empty="' + (count ? '0' : '1') + '" data-now="' + (index === 7 ? '1' : '0') + '" title="' + T('pulse.tip', count) + '" aria-label="' + T('pulse.weekAria', index + 1, count) + '"></span>';
       }).join('') +
-      '</div><div class="pulse__axis"><span>8 周前</span><span>每周提问数</span><span>本周</span></div></div>';
+      '</div><div class="pulse__axis"><span>' + T('pulse.axis.older') + '</span><span>' + T('pulse.axis.label') + '</span><span>' + T('pulse.axis.now') + '</span></div></div>';
   }
 
   function renderSession(session, index, installed) {
     var status = session.empty ? 'var(--c-dim)' : 'var(--st-dev)';
     var openButton = installed
-      ? '<button class="card__btn" data-act="open" data-id="' + escapeHtml(session.id) + '" title="在 Claude 中打开">' + ICON.chat + '</button>'
+      ? '<button class="card__btn" data-act="open" data-id="' + escapeHtml(session.id) + '" title="' + T('action.openInClaude') + '">' + ICON.chat + '</button>'
       : '';
     return '<div class="tl__i" data-id="' + escapeHtml(session.id) + '"' +
       (session.empty ? ' data-empty="1"' : '') +
       ' style="--st:' + status + ';--node:' + nodeSize(session.promptCount) + ';--i:' + Math.min(index, 12) + '">' +
-      '<div class="tl__t" title="' + escapeHtml(session.title || '(空会话)') + '">' + escapeHtml(session.title || '(空会话)') + '</div>' +
-      '<div class="tl__m"><span>' + escapeHtml(session.ago) + '</span><span class="dot"></span><span>' + (Number(session.promptCount) || 0) + ' 次提问</span>' +
+      '<div class="tl__t" title="' + escapeHtml(session.title || T('session.untitled')) + '">' + escapeHtml(session.title || T('session.untitled')) + '</div>' +
+      '<div class="tl__m"><span>' + escapeHtml(session.ago) + '</span><span class="dot"></span><span>' + T('unit.prompts', Number(session.promptCount) || 0) + '</span>' +
       (session.branch ? '<span class="dot"></span><span>' + escapeHtml(session.branch) + '</span>' : '') +
-      '</div><div class="card__act"><button class="card__btn" data-act="preview" data-id="' + escapeHtml(session.id) + '" title="预览">' + ICON.eye + '</button>' +
+      '</div><div class="card__act"><button class="card__btn" data-act="preview" data-id="' + escapeHtml(session.id) + '" title="' + T('action.preview') + '">' + ICON.eye + '</button>' +
       openButton + '</div></div>';
   }
 
@@ -144,25 +144,25 @@
       ? '<div class="tl">' + sessions.map(function (session, index) {
         return renderSession(session, index, Boolean(data.claude && data.claude.installed));
       }).join('') + '</div>'
-      : '<div class="empty"><div class="empty__t">暂无会话</div><div class="empty__d">打开 Claude Code 并开始对话后，会话会出现在这里。</div></div>';
+      : '<div class="empty"><div class="empty__t">' + T('empty.sessions.title') + '</div><div class="empty__d">' + T('empty.sessions.desc') + '</div></div>';
     var count = data.stats ? Number(data.stats.sessionCount) || 0 : sessions.length;
     return '<section class="section" id="sessions-section"><div class="section__head">' +
-      '<h2 class="section__title">会话</h2><span class="section__count" id="sessions-count">' + count + '</span>' +
+      '<h2 class="section__title">' + T('section.sessions') + '</h2><span class="section__count" id="sessions-count">' + count + '</span>' +
       '</div>' + content + '</section>';
   }
 
   function renderTopbar() {
     return '<header class="topbar"><span class="topbar__mark" aria-hidden="true"><i></i><i></i><i></i></span>' +
-      '<h1 class="topbar__title">任务面板</h1></header>';
+      '<h1 class="topbar__title">' + T('panel.title') + '</h1></header>';
   }
 
   function renderDrawer() {
     return '<div class="scrim" id="scrim" data-act="close"></div>' +
-      '<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="会话预览">' +
+      '<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="' + T('drawer.aria') + '">' +
       '<div class="drawer__grip"></div><div class="drawer__head"><div class="drawer__t"></div><div class="drawer__m"></div></div>' +
       '<div class="drawer__body"><div class="quote"></div></div>' +
-      '<div class="drawer__foot"><button class="btn" data-act="open" id="drawer-open">在 Claude 中打开</button>' +
-      '<button class="btn btn--2" data-act="close">关闭</button></div></aside>';
+      '<div class="drawer__foot"><button class="btn" data-act="open" id="drawer-open">' + T('action.openInClaude') + '</button>' +
+      '<button class="btn btn--2" data-act="close">' + T('action.close') + '</button></div></aside>';
   }
 
   function renderApp(data, view) {
@@ -171,7 +171,7 @@
       ? '<div class="notice" id="errors-notice">' + escapeHtml(errors.join(' · ')) + '</div>'
       : '';
     var claudeNotice = data.claude && data.claude.installed === false
-      ? '<div class="notice" id="claude-notice">未检测到 Claude Code 扩展，只能预览、无法恢复会话。</div>'
+      ? '<div class="notice" id="claude-notice">' + T('notice.noClaude') + '</div>'
       : '';
     return renderTopbar() + '<main id="stage" class="stage" aria-live="polite">' + notice +
       renderStats(data) + renderPulse(data) + renderProjectSection(data, view) +
@@ -186,4 +186,5 @@
   window.renderSession = renderSession;
   window.projectId = projectId;
   window.statusMeta = statusMeta;
+  window.statusLabel = statusLabel;
 })();

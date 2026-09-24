@@ -11,10 +11,10 @@ var DATA = {
   pulse: [0, 0, 0, 27, 75, 12, 31, 10],
 
   projects: [
-    { name: 'NGS实验记录系统',       status: '规划中',  docCount: 6, mtimeMs: 0, ago: '5 天前', summary: '医院 NGS 全流程实验记录，含三个平台的录入模板与数据库设计。' },
-    { name: '日知录',                status: '开发中',  docCount: 1, mtimeMs: 0, ago: '5 天前', summary: '每日知识卡 PWA。商业化方向已审死，暂停在 Phase 0。' },
-    { name: '语音输入助手',          status: '已完成',  docCount: 3, mtimeMs: 0, ago: '18 天前', summary: '语音输入 + 实时字幕 + 离线翻译，绿色版已打包实测通过。' },
-    { name: '院内测序试剂管理系统',  status: '已归档',  docCount: 1, mtimeMs: 0, ago: '5 天前', summary: null },
+    { name: 'NGS实验记录系统',       status: 'plan', docCount: 6, mtimeMs: 0, ago: '5 天前', summary: '医院 NGS 全流程实验记录，含三个平台的录入模板与数据库设计。' },
+    { name: '日知录',                status: 'dev',  docCount: 1, mtimeMs: 0, ago: '5 天前', summary: '每日知识卡 PWA。商业化方向已审死，暂停在 Phase 0。' },
+    { name: '语音输入助手',          status: 'live', docCount: 3, mtimeMs: 0, ago: '18 天前', summary: '语音输入 + 实时字幕 + 离线翻译，绿色版已打包实测通过。' },
+    { name: '院内测序试剂管理系统',  status: 'arch', docCount: 1, mtimeMs: 0, ago: '5 天前', summary: null },
     { name: '漫剧测试片',            status: null,      docCount: 2, mtimeMs: 0, ago: '3 天前', summary: 'B 站觉醒漫剧计划 2.0 测试片，11/1 截止。' }
   ],
 

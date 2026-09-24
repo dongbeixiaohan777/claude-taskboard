@@ -6,8 +6,10 @@ const { BoardStore } = require('./store');
 const { TaskboardViewProvider } = require('./panel');
 const { startWatching } = require('./watcher');
 const claude = require('./claude');
+const i18n = require('./i18n');
 
 async function activate(context) {
+  i18n.setLocale(vscode.env.language);
   const output = logger.init();
   context.subscriptions.push(output);
   logger.log(`扩展已激活 · VS Code ${vscode.version}`);

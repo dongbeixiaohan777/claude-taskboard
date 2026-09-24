@@ -5,6 +5,14 @@ const os = require('node:os');
 const path = require('node:path');
 const readline = require('node:readline');
 
+const PROJECT_DIR_CANDIDATES = [
+  ['KB', '02-项目'],
+  ['projects'],
+  ['docs', 'projects'],
+  ['taskboard'],
+  ['.taskboard', 'projects']
+];
+
 function claudeProjectsRoot() {
   return path.join(os.homedir(), '.claude', 'projects');
 }
@@ -87,21 +95,27 @@ async function findSessionDirFor(workspacePath, rootDir) {
 
 /**
  * 解析项目文档目录。
- *
- * ⚠️ 不要写成 getConfiguration().get('projectsDir', '<硬编码绝对路径>')：
- * package.json 把该项默认值注册成了空字符串，而 VS Code 的 get(section, fallback)
- * 只在设置【未定义】时才用 fallback —— 已经被注册的项永远返回 ""，
- * 于是 fallback 成了死代码，fs.access("") 抛 ENOENT，项目区一个都不显示。
+ * 配置项非空时直接使用；否则按常见目录候选顺序探测。
  *
  * @param {string | undefined} workspaceRoot
  * @param {unknown} configured 配置项原值
- * @returns {string | null} 目录绝对路径；无法确定时返回 null
+ * @returns {Promise<string | null>} 目录绝对路径；无法确定时返回 null
  */
-function resolveProjectsDir(workspaceRoot, configured) {
+async function resolveProjectsDir(workspaceRoot, configured) {
   const value = typeof configured === 'string' ? configured.trim() : '';
   if (value) return value;
   if (!workspaceRoot) return null;
-  return path.join(workspaceRoot, 'KB', '02-项目');
+
+  for (const parts of PROJECT_DIR_CANDIDATES) {
+    const candidate = path.join(workspaceRoot, ...parts);
+    try {
+      await fs.promises.access(candidate);
+      if ((await fs.promises.stat(candidate)).isDirectory()) return candidate;
+    } catch (error) {
+      if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') throw error;
+    }
+  }
+  return null;
 }
 
 module.exports = {

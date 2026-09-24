@@ -8,6 +8,7 @@ const projectScanner = require('./lib/projectScanner');
 const { relativeTime } = require('./lib/format');
 const { SessionCache } = require('./cache');
 const logger = require('./logger');
+const { t } = require('./i18n');
 
 function mondayOf(date) {
   const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -130,7 +131,7 @@ class BoardStore {
     this._sessions = [];
 
     if (!workspaceRoot) {
-      errors.push('未打开工作区');
+      errors.push(t('notice.noWorkspace'));
       this._pulse = new Array(8).fill(0);
       this._errors = errors;
       this._emitter.fire(this.getSnapshot());
@@ -140,10 +141,10 @@ class BoardStore {
     let sessionDir = null;
     try {
       sessionDir = await paths.findSessionDirFor(workspaceRoot, paths.claudeProjectsRoot());
-      if (!sessionDir) errors.push('会话目录不存在');
+      if (!sessionDir) errors.push(t('notice.sessionDirMissing'));
     } catch (error) {
       logger.error('查找会话目录失败', error);
-      errors.push('无法定位会话目录');
+      errors.push(t('notice.locateSessionFailed'));
     }
 
     if (sessionDir) {
@@ -154,18 +155,18 @@ class BoardStore {
           force,
           onError: (filePath, error) => {
             logger.error(`读取会话失败：${path.basename(filePath)}`, error);
-            errors.push('部分会话读取失败');
+            errors.push(t('notice.readSessionsFailed'));
           }
         });
         try {
           await this._cache.write(this._sessions);
         } catch (error) {
           logger.error('写入会话缓存失败', error);
-          errors.push('缓存写入失败');
+          errors.push(t('notice.cacheWriteFailed'));
         }
       } catch (error) {
         logger.error('扫描会话目录失败', error);
-        errors.push('无法读取会话目录');
+        errors.push(t('notice.scanSessionsFailed'));
         this._sessions = [];
       }
     }
@@ -173,7 +174,7 @@ class BoardStore {
     try {
       // 用 resolveProjectsDir：设置项已注册为默认 ""，直接 get(section, fallback)
       // 拿不到 fallback（那是死代码），会返回空字符串导致 fs.access 抛错。
-      const projectsDir = paths.resolveProjectsDir(
+      const projectsDir = await paths.resolveProjectsDir(
         workspaceRoot,
         this.vscode.workspace.getConfiguration('taskboard').get('projectsDir')
       );
@@ -182,9 +183,9 @@ class BoardStore {
       this._projects = await projectScanner.scanProjects(projectsDir);
     } catch (error) {
       logger.error('扫描项目目录失败', error);
-      errors.push(error.code === 'ENOENT' || error.code === 'ENOTDIR'
-        ? '项目目录不存在'
-        : '无法读取项目目录');
+      errors.push(t(error.code === 'ENOENT' || error.code === 'ENOTDIR'
+        ? 'notice.projectsDirMissing'
+        : 'notice.scanProjectsFailed'));
       this._projects = [];
     }
 

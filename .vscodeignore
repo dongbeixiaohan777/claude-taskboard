@@ -1,0 +1,21 @@
+# 打 .vsix 时排除的开发产物。
+# 目标：装到用户机器上的只有运行必需的东西。
+
+# 设计沙盘与截图 —— 只有开发期用
+dev/**
+docs/**
+
+# 测试与固件 —— 用户不需要
+test/**
+*.test.js
+
+# 仓库杂项
+.gitignore
+.vscodeignore
+.github/**
+.editorconfig
+
+# 中文文档不打包：市场按 README.md 渲染，中文版放仓库里给人看
+README.zh-CN.md
+CHANGELOG.md
+LICENSE

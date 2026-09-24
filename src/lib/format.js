@@ -1,5 +1,7 @@
 'use strict';
 
+const { t } = require('../i18n');
+
 function relativeTime(isoString, now = Date.now()) {
   const timestamp = new Date(isoString).getTime();
   if (!Number.isFinite(timestamp)) return '';
@@ -9,11 +11,11 @@ function relativeTime(isoString, now = Date.now()) {
   const hour = 60 * minute;
   const day = 24 * hour;
 
-  if (elapsed < minute) return '刚刚';
-  if (elapsed < hour) return `${Math.floor(elapsed / minute)} 分钟前`;
-  if (elapsed < day) return `${Math.floor(elapsed / hour)} 小时前`;
-  if (elapsed < 2 * day) return '昨天';
-  if (elapsed <= 30 * day) return `${Math.floor(elapsed / day)} 天前`;
+  if (elapsed < minute) return t('time.justNow');
+  if (elapsed < hour) return t('time.minutesAgo', Math.floor(elapsed / minute));
+  if (elapsed < day) return t('time.hoursAgo', Math.floor(elapsed / hour));
+  if (elapsed < 2 * day) return t('time.yesterday');
+  if (elapsed <= 30 * day) return t('time.daysAgo', Math.floor(elapsed / day));
 
   const date = new Date(timestamp);
   return `${date.getMonth() + 1}-${date.getDate()}`;
