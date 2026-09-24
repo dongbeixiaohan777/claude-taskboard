@@ -1,0 +1,2 @@
+{"type":"user","message":{"content":"<task-notification>\n<task-id>abc</task-id>\n<tool-use-id>call_00_x</tool-use-id>\n<output-file>C:\\tmp\\a.txt</output-file>\n</task-notification>"},"timestamp":"2026-09-14T10:00:00.000Z"}
+{"type":"user","message":{"content":"帮我看看这个面板"},"timestamp":"2026-09-14T10:01:00.000Z"}

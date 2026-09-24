@@ -1,0 +1,96 @@
+{
+  "name": "vscode-taskboard",
+  "displayName": "任务面板",
+  "description": "侧边栏任务面板：02-项目看板 + Claude Code 会话时间线",
+  "version": "0.1.0",
+  "publisher": "local",
+  "private": true,
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "onView:taskboard.main"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "taskboard",
+          "title": "任务面板",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "taskboard": [
+        {
+          "type": "webview",
+          "id": "taskboard.main",
+          "name": "任务面板"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "taskboard.refresh",
+        "title": "刷新",
+        "category": "任务面板",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "taskboard.toggle",
+        "title": "切换看板 / 列表",
+        "category": "任务面板",
+        "icon": "$(list-unordered)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "taskboard.toggle",
+          "when": "view == taskboard.main",
+          "group": "navigation@1"
+        },
+        {
+          "command": "taskboard.refresh",
+          "when": "view == taskboard.main",
+          "group": "navigation@2"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "任务面板",
+      "properties": {
+        "taskboard.glassEffect": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "on",
+            "off"
+          ],
+          "enumDescriptions": [
+            "只在深色主题下启用玻璃质感（浅色主题保持扁平）",
+            "任何主题都启用玻璃质感",
+            "关闭玻璃质感，始终使用扁平样式"
+          ],
+          "default": "auto",
+          "markdownDescription": "面板的液态玻璃质感。\n\n**auto**（默认）——玻璃需要「透出背后的东西」才好看。深色主题底色暗，透出的层次感强；浅色主题是一整片浅灰，玻璃只会把白卡片的清爽对比糊掉。所以默认按主题自动切换。\n\n改完立即生效，不用重载窗口。"
+        },
+        "taskboard.projectsDir": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "项目文档目录。留空则自动使用当前工作区下的 `KB/02-项目`。"
+        }
+      }
+    }
+  }
+}

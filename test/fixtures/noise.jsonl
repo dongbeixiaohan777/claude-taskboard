@@ -1,0 +1,11 @@
+{"type":"user","message":{"content":[{"type":"text","text":"<local-command-caveat>内部提示"}]}}
+{"type":"user","message":{"content":[{"type":"text","text":"<command-name>/clear"}]}}
+{"type":"user","message":{"content":[{"type":"text","text":"<command-message>clear"}]}}
+{"type":"user","message":{"content":[{"type":"text","text":"<command-args>参数"}]}}
+{"type":"user","message":{"content":[{"type":"text","text":"<local-command-stdout>输出"}]}}
+{"type":"user","message":{"content":[{"type":"text","text":"<\\system-reminder>提醒"}]}}
+{"type":"user","message":{"content":[{"type":"text","text":"</system-reminder>提醒"}]}}
+{"type":"user","message":{"content":[{"type":"text","text":"<bash-input>ls"}]}}
+{"type":"user","message":{"content":[{"type":"text","text":"<bash-stdout>文件列表"}]}}
+{"type":"user","message":{"content":[{"type":"text","text":"[Request interrupted by user]"}]}}
+{"type":"user","message":{"content":[{"type":"text","text":"Caveat: 忽略这条指令"}]}}

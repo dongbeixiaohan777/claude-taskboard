@@ -1,0 +1,149 @@
+/* ============================================================
+   液态玻璃层
+   ============================================================
+
+   开关：所有规则都挂在 body.glass-on 下。这个类由 media/main.js
+   根据两件事决定要不要加 —— ①设置项 taskboard.glassEffect ②当前主题明暗。
+   好处是整套效果只有一个开关，不用为「浅色 / 深色 / 强制开 / 强制关」
+   四种组合各写一遍 CSS。
+
+   为什么默认只在深色主题下开：
+   玻璃的观感来自「透出背后的东西」。深色主题底色暗，环境光透出来的
+   层次感强；浅色主题是一整片浅灰，玻璃层只会把「白卡片浮在灰底上」
+   的清爽对比糊掉 —— 实测两种主题下结论相反，所以默认不能一刀切。
+
+   高对比主题由 main.js 排除在外（半透明会削弱对比度，伤害可访问性）。
+
+   手法：面板自己画一层柔光环境背景（.app::before），玻璃件浮在上面，
+   backdrop-filter 才有东西可模糊。否则 VS Code 侧边栏是纯色，
+   模糊纯色 = 纯色，效果为零。
+   ============================================================ */
+
+/* ── 玻璃令牌：浅色与深色各一套 ── */
+body.glass-on {
+  --glass-blur: 20px;
+  --r-glass: 15px;
+  --glass-fill: color-mix(in srgb, var(--c-bg) 58%, transparent);
+  --glass-fill-hi: color-mix(in srgb, var(--c-bg) 46%, transparent);
+  --glass-edge: color-mix(in srgb, #fff 66%, transparent);
+  --glass-edge-soft: color-mix(in srgb, #fff 30%, transparent);
+  --glass-shade: color-mix(in srgb, #000 7%, transparent);
+  --glass-ambient: .6;
+}
+body.vscode-dark.glass-on {
+  --glass-fill: color-mix(in srgb, var(--c-bg) 62%, transparent);
+  --glass-fill-hi: color-mix(in srgb, var(--c-bg) 50%, transparent);
+  --glass-edge: color-mix(in srgb, #fff 20%, transparent);
+  --glass-edge-soft: color-mix(in srgb, #fff 9%, transparent);
+  --glass-shade: color-mix(in srgb, #000 26%, transparent);
+  --glass-ambient: .62;
+}
+
+/* ── 环境光：玻璃「可折射的东西」─────────────────────────
+   固定不动，卡片滚动时掠过它 —— 这才是玻璃感的来源 */
+body.glass-on .app::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(88% 40% at 4% -6%,    color-mix(in srgb, var(--c-accent) 40%, transparent), transparent 62%),
+    radial-gradient(74% 34% at 102% 6%,   color-mix(in srgb, var(--st-dev)  30%, transparent), transparent 58%),
+    radial-gradient(104% 44% at 84% 82%,  color-mix(in srgb, var(--st-plan) 26%, transparent), transparent 62%),
+    radial-gradient(120% 46% at 22% 104%, color-mix(in srgb, var(--st-dev)  22%, transparent), transparent 64%);
+  opacity: var(--glass-ambient);
+}
+body.glass-on .app > * { z-index: 1; }
+
+/* ── 顶栏 ── */
+body.glass-on .topbar {
+  background: color-mix(in srgb, var(--c-bg) 66%, transparent);
+  backdrop-filter: blur(var(--glass-blur)) saturate(170%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(170%);
+  border-bottom: 1px solid var(--glass-edge-soft);
+}
+
+/* ── 卡片：核心玻璃件 ── */
+body.glass-on .card {
+  background: var(--glass-fill);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-edge-soft);
+  border-radius: var(--r-glass);
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-edge),      /* 顶边高光 = 玻璃的「厚度」 */
+    inset 0 -1px 0 0 var(--glass-shade),
+    0 6px 18px -10px rgba(0, 0, 0, .3);
+}
+body.glass-on .card::before { display: none; }
+body.glass-on .card:hover {
+  background: var(--glass-fill-hi);
+  border-color: var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-edge),
+    inset 0 -1px 0 0 var(--glass-shade),
+    0 14px 32px -14px rgba(0, 0, 0, .4);
+}
+
+/* ── 分段控件 ── */
+body.glass-on .seg {
+  background: color-mix(in srgb, var(--c-fg) 10%, transparent);
+  backdrop-filter: blur(12px) saturate(170%);
+  -webkit-backdrop-filter: blur(12px) saturate(170%);
+  border: 1px solid var(--glass-edge-soft);
+  border-radius: var(--r-pill);
+}
+body.glass-on .seg__thumb {
+  background: color-mix(in srgb, #fff 58%, transparent);
+  border-radius: var(--r-pill);
+  box-shadow: inset 0 1px 0 0 var(--glass-edge), 0 2px 8px -3px rgba(0, 0, 0, .28);
+}
+body.vscode-dark.glass-on .seg__thumb { background: color-mix(in srgb, #fff 15%, transparent); }
+
+/* ── 列表行 ── */
+body.glass-on .row { border-radius: 10px; }
+body.glass-on .row:hover {
+  background: var(--glass-fill);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: inset 0 1px 0 0 var(--glass-edge-soft);
+}
+
+/* ── 脉搏 ── */
+body.glass-on .pulse__bars { border-bottom-color: var(--glass-edge-soft); }
+body.glass-on .pulse__b { border-radius: 3px 3px 0 0; }
+
+/* ── 时间线节点 ── */
+body.glass-on .tl__i::before {
+  background: color-mix(in srgb, var(--c-bg) 45%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ── 抽屉：厚玻璃 ── */
+body.glass-on .drawer {
+  background: color-mix(in srgb, var(--c-bg) 76%, transparent);
+  backdrop-filter: blur(32px) saturate(190%);
+  -webkit-backdrop-filter: blur(32px) saturate(190%);
+  border-top: 1px solid var(--glass-edge);
+}
+body.glass-on .scrim { background: color-mix(in srgb, #000 20%, transparent); }
+body.glass-on .reply, body.glass-on .quote { border-radius: 10px; }
+
+/* ── 按钮 ── */
+body.glass-on .btn {
+  border-radius: var(--r-pill);
+  box-shadow: inset 0 1px 0 0 var(--glass-edge);
+}
+body.glass-on .btn--2 {
+  background: color-mix(in srgb, var(--c-fg) 10%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-edge-soft);
+}
+
+/* 「减少动态效果」优先于一切花哨效果 */
+@media (prefers-reduced-motion: reduce) {
+  .topbar, .card, .seg, .drawer, .row:hover, .btn--2, .tl__i::before {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}

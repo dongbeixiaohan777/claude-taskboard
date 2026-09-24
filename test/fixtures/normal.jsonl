@@ -1,0 +1,5 @@
+{"type":"ai-title","aiTitle":"初始标题","timestamp":"2026-09-24T10:00:00.000Z"}
+{"type":"user","message":{"content":[{"type":"text","text":"请帮我梳理这个项目的启动步骤"}]},"timestamp":"2026-09-20T08:00:00.000Z","gitBranch":"main"}
+{"type":"user","message":{"content":[{"type":"tool_result","content":"命令输出"}]},"timestamp":"2026-09-23T12:00:00.000Z"}
+{"type":"assistant","message":{"model":"claude-sonnet-4-5"},"timestamp":"2026-09-21T09:00:00.000Z","gitBranch":"feature/session-scan"}
+{"type":"ai-title","aiTitle":"最终会话标题","timestamp":"2026-09-22T11:00:00.000Z"}

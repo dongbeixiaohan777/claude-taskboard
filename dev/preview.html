@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!--
+  设计沙盘 —— 仅供开发期肉眼迭代视觉，不随扩展发布。
+  加载的是 media/style.css 本体（同一份文件），所以这里看到的就是最终效果。
+  主题变量取自 VS Code 内置 Quiet Light 主题的真实色值。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>任务面板 · 设计沙盘</title>
+<link rel="stylesheet" href="../media/style.css">
+<link rel="stylesheet" href="../media/glass.css">
+<style>
+  /* 沙盘外壳：模拟 300px 侧边栏宽度 */
+  html, body { height: auto; }
+  body {
+    display: flex; align-items: flex-start; justify-content: center;
+    gap: 24px; padding: 24px;
+    background: #dededc;
+  }
+  .frame {
+    width: 300px; height: 760px; overflow: hidden;
+    display: flex; flex-direction: column;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px -12px rgba(0,0,0,.4);
+    background: var(--c-bg);
+  }
+  .frame .app { flex: 1; min-height: 0; }
+
+  /* ── Quiet Light（用户当前主题）真实色值 ── */
+  body.vscode-light {
+    --vscode-foreground: #333333;
+    --vscode-descriptionForeground: #717171;
+    --vscode-sideBar-background: #F2F2F2;
+    --vscode-widget-border: #d4d4d4;
+    --vscode-list-hoverBackground: #e0e0e0;
+    --vscode-focusBorder: #9769dc;
+    --vscode-button-background: #705697;
+    --vscode-button-foreground: #ffffff;
+    --vscode-button-hoverBackground: #8a6cb0;
+    --vscode-button-secondaryBackground: #dcdcdc;
+    --vscode-button-secondaryForeground: #333333;
+    --vscode-button-secondaryHoverBackground: #cfcfcf;
+  }
+  /* ── Dark Modern 真实色值 ── */
+  body.vscode-dark {
+    --vscode-foreground: #CCCCCC;
+    --vscode-descriptionForeground: #9d9d9d;
+    --vscode-sideBar-background: #181818;
+    --vscode-widget-border: #313131;
+    --vscode-list-hoverBackground: #2a2d2e;
+    --vscode-focusBorder: #0078d4;
+    --vscode-button-background: #0078d4;
+    --vscode-button-foreground: #ffffff;
+    --vscode-button-hoverBackground: #026ec1;
+    --vscode-button-secondaryBackground: #313131;
+    --vscode-button-secondaryForeground: #CCCCCC;
+    --vscode-button-secondaryHoverBackground: #3c3c3c;
+  }
+
+  .bar {
+    position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px; z-index: 99;
+    padding: 4px; border-radius: 999px;
+    background: rgba(0,0,0,.72);
+  }
+  .bar button {
+    padding: 4px 12px; border-radius: 999px;
+    font: 500 12px/1.4 system-ui, sans-serif; color: #ddd;
+  }
+  .bar button.on { background: #fff; color: #111; }
+</style>
+</head>
+<body class="vscode-light">
+<div class="frame"><div class="app" id="app"></div></div>
+<div class="frame" id="frame2" style="display:none"><div class="app" id="app2"></div></div>
+
+<div class="bar">
+  <button data-t="vscode-light" class="on">Quiet Light</button>
+  <button data-t="vscode-dark">Dark</button>
+  <span style="width:1px;background:#444;margin:0 4px"></span>
+  <button data-g="auto" class="on">玻璃 auto</button>
+  <button data-g="on">强制开</button>
+  <button data-g="off">关</button>
+  <button id="cmp">并排对比</button>
+</div>
+
+<script src="preview-data.js"></script>
+<script src="../media/views.js"></script>
+<script>
+(function () {
+  document.getElementById('app').innerHTML = window.renderApp(DATA, 'board');
+  document.getElementById('app2').innerHTML = window.renderApp(DATA, 'list');
+
+  var theme = 'vscode-light';
+  var glass = DATA.glass || 'auto';
+
+  // 与 media/main.js 的 syncGlass() 同构：验证这套判定逻辑在浏览器里成立
+  function syncGlass() {
+    var on = glass === 'on' || (glass === 'auto' && theme === 'vscode-dark');
+    document.body.className = theme + (on ? ' glass-on' : '');
+  }
+
+  document.querySelectorAll('.bar [data-t]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      theme = b.dataset.t;
+      document.querySelectorAll('.bar [data-t]').forEach(function (x) { x.classList.toggle('on', x === b); });
+      syncGlass();
+    });
+  });
+  document.querySelectorAll('.bar [data-g]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      glass = b.dataset.g;
+      document.querySelectorAll('.bar [data-g]').forEach(function (x) { x.classList.toggle('on', x === b); });
+      syncGlass();
+    });
+  });
+
+  document.getElementById('cmp').addEventListener('click', function () {
+    var f2 = document.getElementById('frame2');
+    f2.style.display = f2.style.display === 'none' ? 'flex' : 'none';
+    f2.className = 'frame';
+  });
+
+  syncGlass();
+})();
+</script>
+</body>
+</html>
