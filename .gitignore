@@ -1,3 +1,7 @@
 node_modules/
 *.vsix
 .vscode/
+
+# 沙盘截图：可能含真实数据（文字烤进像素，grep 扫不出来）。
+# 公开用的截图一律放 docs/，且必须用 dev/demo-data.js 的中性数据。
+dev/*.png
