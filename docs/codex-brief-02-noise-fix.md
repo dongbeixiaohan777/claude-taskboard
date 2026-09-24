@@ -3,7 +3,7 @@
 ## 背景
 
 任务书 01 你实现的 `src/lib/*` 结构正确、10 个测试全绿。
-但我把它**接到真实数据上跑**（`C:\Users\东北小汉\.claude\projects\d--Claude\`，21 个 jsonl），
+但我把它**接到真实数据上跑**（`C:\Users\<用户名>\.claude\projects\d--Claude\`，21 个 jsonl），
 发现**提问总数比真值多 9 条**。
 
 根因：**任务书 01 里我给的噪音前缀清单本身是错的**（漏了 `<task-notification>`）。
@@ -135,7 +135,7 @@ function stripLeadingTagBlocks(text) {
 **`slash-command.jsonl`** —— 断言 `realPromptCount === 1`（斜杠命令那条不算）
 ```
 {"type":"user","message":{"content":"<command-message>money</command-message>\n<command-name>/money</command-name>\n<command-args></command-args>"},"timestamp":"2026-09-14T10:00:00.000Z"}
-{"type":"user","message":{"content":"换日知录做一遍。"},"timestamp":"2026-09-14T10:01:00.000Z"}
+{"type":"user","message":{"content":"换示例工具做一遍。"},"timestamp":"2026-09-14T10:01:00.000Z"}
 ```
 
 ### 5. 新增 `test/smoke.mjs` —— 真机冒烟（可选跑，只读）

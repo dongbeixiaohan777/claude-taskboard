@@ -161,11 +161,11 @@ titleSource = aiTitle ? 'ai' : customTitle ? 'custom' : firstPrompt ? 'prompt' :
 
 **状态解析**——状态编码在目录名后缀：
 ```
-NGS实验记录系统-规划中        → { name: 'NGS实验记录系统',   status: '规划中' }
-日知录-开发中                 → { name: '日知录',            status: '开发中' }
-语音输入助手-已完成           → { name: '语音输入助手',      status: '已完成' }
-院内测序试剂管理系统-已归档   → { name: '院内测序试剂管理系统', status: '已归档' }
-漫剧测试片                    → { name: '漫剧测试片',        status: null }
+示例应用-规划中        → { name: '示例应用',   status: '规划中' }
+示例工具-开发中                 → { name: '示例工具',            status: '开发中' }
+示例项目-已完成           → { name: '示例项目',      status: '已完成' }
+遗留系统-已归档   → { name: '遗留系统', status: '已归档' }
+无状态目录                    → { name: '无状态目录',        status: null }
 ```
 
 ⚠️ **规范与实际不一致，必须容错**：`KB/02-项目/README.md` 里写的状态词表是
@@ -273,8 +273,8 @@ const assert = require('node:assert');
 - `string-content.jsonl` 能正确提取出提问文本
 - `format.relativeTime` 边界：59 秒 → `刚刚`，90 秒 → `1 分钟前`，
   25 小时 → `昨天`，40 天 → `M-D` 格式
-- `projectScanner` 对 `漫剧测试片` 这类无后缀名字返回 `status: null`
-- `projectScanner` 对 `语音输入助手-已完成` 返回 `status: '已完成'`（**不是**规范里的 `已上线`）
+- `projectScanner` 对 `无状态目录` 这类无后缀名字返回 `status: null`
+- `projectScanner` 对 `示例项目-已完成` 返回 `status: '已完成'`（**不是**规范里的 `已上线`）
 
 ---
 
