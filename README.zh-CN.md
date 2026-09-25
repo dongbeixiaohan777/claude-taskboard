@@ -171,7 +171,23 @@ KB/02-项目          projects/          docs/projects/          taskboard/
 ```bash
 node --test test/*.test.js    # 单元测试，零依赖，用 Node 内置测试框架
 node test/smoke.mjs           # 扫你真实的 ~/.claude/projects 并打印表格
+node dev/render-all.mjs       # 重新生成截图（无头 Chrome，不装任何 npm 包）
 ```
+
+### 重新生成截图
+
+`dev/render-all.mjs` 用一个进程渲染全部面板变体，调用你系统装的 Chrome 或 Edge 无头模式 ——
+**不需要 playwright、不需要 puppeteer、不需要 npm install**。
+
+```bash
+node dev/render-all.mjs                # 本 README 用的那三张
+node dev/render-all.mjs --set all      # 所有主题 × 视图 × 语言组合
+node dev/render-all.mjs --out /tmp/x   # 换输出目录
+```
+
+它用 **`dev/demo-data.js`** 的虚构数据渲染（`docs-site`、`api-gateway`、`cli-tool`），
+而不是任何人的真实工作区。**面板截图是烤进像素的文字，grep 检查不出泄露** ——
+把演示数据和真实数据彻底分开，是唯一可靠的防线。
 
 改完代码后：命令面板 → `Reload Window`。
 
@@ -188,6 +204,8 @@ src/i18n.js            字符串表（扩展侧）
 src/lib/               纯 Node，不 import vscode，可直接单测
 media/                 webview：style.css / glass.css / i18n.js / views.js / main.js
 dev/preview.html       设计沙盘 —— 浏览器打开就能迭代视觉
+dev/shot.html          同上，但专供截图：中性演示数据、无沙盘工具栏
+dev/render-all.mjs     批量截图器（无头 Chrome，零依赖）
 docs/                  交给编码 agent 的任务书（大部分代码是它写的）
 ```
 

@@ -180,7 +180,24 @@ a scan cache in VS Code's own extension storage.
 ```bash
 node --test test/*.test.js    # unit tests, zero dependencies, Node's built-in runner
 node test/smoke.mjs           # scan your real ~/.claude/projects and print a table
+node dev/render-all.mjs       # regenerate the screenshots (headless Chrome, no npm packages)
 ```
+
+### Regenerating the screenshots
+
+`dev/render-all.mjs` renders every panel variant in one process using your installed
+Chrome or Edge in headless mode — no `playwright`, no `puppeteer`, no `npm install`.
+
+```bash
+node dev/render-all.mjs                # the three used in this README
+node dev/render-all.mjs --set all      # every theme × view × locale combination
+node dev/render-all.mjs --out /tmp/x   # somewhere else
+```
+
+It renders `dev/shot.html` against **`dev/demo-data.js`** — deliberately fictional
+projects (`docs-site`, `api-gateway`, `cli-tool`) rather than anyone's real workspace.
+Screenshots of the panel are text baked into pixels, so they can't be redaction-checked
+by grepping; keeping the demo data separate from real data is the only reliable guard.
 
 After editing, run `Reload Window` from the command palette.
 
@@ -197,6 +214,8 @@ src/i18n.js            strings (extension side)
 src/lib/               pure Node, no vscode import, unit-testable
 media/                 webview: style.css, glass.css, i18n.js, views.js, main.js
 dev/preview.html       design sandbox — open it in a browser to iterate on visuals
+dev/shot.html          same, but for screenshots: neutral demo data, no toolbar chrome
+dev/render-all.mjs     batch screenshot renderer (headless Chrome, zero dependencies)
 docs/                  briefs handed to the coding agent that wrote most of this
 ```
 
