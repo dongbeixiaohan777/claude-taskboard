@@ -15,7 +15,8 @@ test/**
 .github/**
 .editorconfig
 
-# 中文文档不打包：市场按 README.md 渲染，中文版放仓库里给人看
+# 中文 README 不打包：市场只渲染 README.md，中文版放仓库里给人看
 README.zh-CN.md
-CHANGELOG.md
-LICENSE
+
+# LICENSE 和 CHANGELOG.md 要随包发：
+# 市场会把 CHANGELOG 显示成一个标签页，LICENSE 是许可声明的实体文件
