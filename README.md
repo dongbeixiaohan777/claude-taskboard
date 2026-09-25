@@ -56,13 +56,17 @@ Override with `taskboard.glassEffect` if you disagree.
 
 ## Install
 
-**From the marketplace:** search for **Claude Taskboard** in the Extensions view.
-
-**From a VSIX:**
+**Download the VSIX** from the [latest release](https://github.com/dongbeixiaohan777/claude-taskboard/releases/latest), then:
 
 ```bash
 code --install-extension claude-taskboard-0.1.0.vsix
 ```
+
+Or in VS Code: Command Palette → `Extensions: Install from VSIX...` → pick the file.
+
+> Not on the VS Code Marketplace yet — publishing there requires an Azure DevOps
+> organization, which is blocked by a Microsoft account tenant issue. Track it in
+> [issues](https://github.com/dongbeixiaohan777/claude-taskboard/issues).
 
 **From source:**
 

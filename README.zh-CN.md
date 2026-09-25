@@ -53,13 +53,16 @@ some-folder          → 未标注   （黄色脊）
 
 ## 安装
 
-**从市场装**：在扩展视图里搜 **Claude Taskboard**。
-
-**从 VSIX 装**：
+**从 [最新 Release](https://github.com/dongbeixiaohan777/claude-taskboard/releases/latest) 下载 `.vsix`**，然后：
 
 ```bash
 code --install-extension claude-taskboard-0.1.0.vsix
 ```
+
+或者在 VS Code 里：命令面板 → `Extensions: Install from VSIX...` → 选该文件。
+
+> 暂未上架 VS Code 市场——上架需要 Azure DevOps 组织，而微软账号的租户问题卡住了。
+> 进展见 [issues](https://github.com/dongbeixiaohan777/claude-taskboard/issues)。
 
 **从源码装**：
 
