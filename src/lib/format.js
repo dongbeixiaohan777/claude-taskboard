@@ -51,4 +51,31 @@ function truncate(value, max) {
   return `${text.slice(0, max - 1)}…`;
 }
 
-module.exports = { relativeTime, absoluteTime, formatSize, truncate };
+// 助手的回复是 Markdown，塞进 300px 宽的抽屉里全是噪音（##、**、表格竖线）。
+// 这里只做「去符号、留文字」，不追求还原排版：抽屉用 textContent 渲染，
+// 所以不能产出 HTML —— 也就不存在注入问题。
+function plainify(value) {
+  let text = String(value == null ? '' : value);
+  text = text.replace(/\r\n?/g, '\n');
+  text = text.replace(/^[ \t]*```[^\n]*$/gm, '');                      // 代码围栏（内容保留）
+  text = text.replace(/!\[[^\]]*\]\([^)]*\)/g, '');                    // 图片
+  text = text.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');                 // 链接留文字
+  text = text.replace(/^[ \t]{0,3}#{1,6}[ \t]+/gm, '');                // 标题
+  text = text.replace(/^[ \t]{0,3}(?:>[ \t]?)+/gm, '');                // 引用
+  text = text.replace(/\*\*([^*]+)\*\*/g, '$1');
+  text = text.replace(/__([^_]+)__/g, '$1');
+  text = text.replace(/(^|[\s(（])[*_]([^*_\n]+)[*_]/g, '$1$2');       // 斜体
+  text = text.replace(/`([^`\n]+)`/g, '$1');
+  text = text.replace(/^[ \t]*[-*_](?:[ \t]*[-*_]){2,}[ \t]*$/gm, '');  // 分隔线
+  // 表格分隔行连同它的换行一起删掉，否则表头和数据之间会凭空多一个空行
+  text = text.replace(/^[ \t]*\|[:| \t-]*-{2,}[:| \t-]*\|[ \t]*\n?/gm, '');
+  text = text.replace(/^[ \t]*\|(.+)\|[ \t]*$/gm, (line, row) => (
+    row.split('|').map((cell) => cell.trim()).filter(Boolean).join(' · ')
+  ));
+  text = text.replace(/^([ \t]*)[-*+][ \t]+/gm, '$1• ');               // 列表
+  text = text.replace(/[ \t]+$/gm, '');
+  text = text.replace(/\n{3,}/g, '\n\n');
+  return text.trim();
+}
+
+module.exports = { relativeTime, absoluteTime, formatSize, truncate, plainify };

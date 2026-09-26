@@ -156,11 +156,20 @@
       '<h1 class="topbar__title">' + T('panel.title') + '</h1></header>';
   }
 
+  // 抽屉回答「这个会话聊到哪了」：最后我说的话 + 最后的回复。
+  // 开头那次提问只留一行小字当背景，不抢地方。
   function renderDrawer() {
     return '<div class="scrim" id="scrim" data-act="close"></div>' +
       '<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="' + T('drawer.aria') + '">' +
       '<div class="drawer__grip"></div><div class="drawer__head"><div class="drawer__t"></div><div class="drawer__m"></div></div>' +
-      '<div class="drawer__body"><div class="quote"></div></div>' +
+      '<div class="drawer__body">' +
+      '<div class="dsec" id="dsec-prompt"><div class="dsec__l">' + T('drawer.lastPrompt') + '</div>' +
+      '<div class="quote"></div></div>' +
+      '<div class="dsec" id="dsec-reply"><div class="dsec__l">' + T('drawer.lastReply') + '</div>' +
+      '<div class="reply"></div></div>' +
+      '<div class="dfirst" id="dsec-first"><span class="dfirst__l">' + T('drawer.firstPrompt') + '</span>' +
+      '<span class="dfirst__t"></span></div>' +
+      '</div>' +
       '<div class="drawer__foot"><button class="btn" data-act="open" id="drawer-open">' + T('action.openInClaude') + '</button>' +
       '<button class="btn btn--2" data-act="close">' + T('action.close') + '</button></div></aside>';
   }
@@ -179,11 +188,13 @@
   }
 
   window.renderApp = renderApp;
+  window.renderDrawer = renderDrawer;
   window.renderProjectSection = renderProjectSection;
   window.renderSessionsSection = renderSessionsSection;
   window.renderProjectCard = renderProjectCard;
   window.renderProjectRow = renderProjectRow;
   window.renderSession = renderSession;
+  window.nodeSize = nodeSize;
   window.projectId = projectId;
   window.statusMeta = statusMeta;
   window.statusLabel = statusLabel;

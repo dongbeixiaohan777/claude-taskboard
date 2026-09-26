@@ -476,8 +476,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .drawer__body { flex: 1; overflow-y: auto; padding: 0 var(--sp-3) var(--sp-3); }
 
+/* 抽屉里的两块正文：提问（引用样式）+ 最后回复（主体，不截断，能读完） */
+.dsec + .dsec { margin-top: var(--sp-2); }
+.dsec__l {
+  margin-bottom: 4px;
+  font-size: var(--fs-micro); font-weight: 600; letter-spacing: .02em;
+  color: var(--c-dim);
+}
 .quote {
-  padding: 7px 10px; margin-bottom: var(--sp-2);
+  padding: 7px 10px;
   background: var(--card-bg);
   border-left: 2px solid var(--c-accent);
   border-radius: 0 var(--r-md) var(--r-md) 0;
@@ -486,12 +493,28 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .reply {
   padding: 6px 0 6px 10px;
-  border-left: 1px solid var(--hairline);
-  font-size: var(--fs-meta); color: var(--c-dim); line-height: 1.5;
+  /* 中性色：状态色（--st-*）只用来表示项目状态，别借给正文 */
+  border-left: 2px solid color-mix(in srgb, var(--c-fg) 20%, transparent);
+  font-size: var(--fs-meta); line-height: 1.55;
   white-space: pre-wrap; word-break: break-word;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-  overflow: hidden;
 }
+.dsec[data-empty] .quote,
+.dsec[data-empty] .reply { color: var(--c-dim); font-style: italic; }
+
+/* 开头那次提问：压成一行小字，只当背景提示 */
+.dfirst {
+  display: flex; gap: 6px; align-items: baseline;
+  margin-top: var(--sp-3); padding-top: 6px;
+  border-top: 1px solid var(--hairline);
+  font-size: var(--fs-micro); color: var(--c-dim);
+}
+.dfirst__l { flex: none; }
+.dfirst__t {
+  min-width: 0; overflow: hidden;
+  white-space: nowrap; text-overflow: ellipsis;
+  opacity: .85;
+}
+.dfirst[hidden] { display: none; }
 
 .drawer__foot {
   display: flex; gap: var(--sp-2); flex: none;
@@ -574,4 +597,3 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .toast--error { border-left: 3px solid var(--st-none); }
 .toast--info { border-left: 3px solid var(--c-accent); }
-.drawer__body .reply + .reply { margin-top: 4px; }

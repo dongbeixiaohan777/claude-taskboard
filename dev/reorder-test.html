@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!--
+  排序诊断页：把 media/main.js 放进真浏览器，连喂三帧快照，看顺序有没有跟着变。
+
+  为什么要有这页：webview 的增量更新路径（syncSessions → placeInOrder）只有「面板
+  已经开着、又收到新快照」时才走，第一屏走的是整页 innerHTML —— 单测和截图都照不到
+  它。真出过事：syncSessionNode 里一个未导出的函数让这段每次都抛异常，表现是
+  「时间文案会更新，但顺序永远不变、新会话永远不出现」。
+
+  用法：node dev/serve.mjs，然后开
+        http://localhost:8791/dev/reorder-test.html ，结果在 window.__log 里。
+        after1/after2/after3 分别对应三帧：末帧应为 E C A B D F G。
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>reorder test</title>
+<link rel="stylesheet" href="../media/style.css">
+<link rel="stylesheet" href="../media/glass.css">
+</head>
+<body class="vscode-light">
+<div id="root"></div>
+<script>
+window.acquireVsCodeApi = function () {
+  return { postMessage: function (m) { (window.__sent = window.__sent || []).push(m); }, setState: function () {}, getState: function () { return null; } };
+};
+</script>
+<script src="../media/i18n.js"></script>
+<script src="../media/views.js"></script>
+<script src="../media/main.js"></script>
+<script>
+(function () {
+  window.initI18n('zh-cn');
+  function session(id, ago) {
+    return { id: id, title: id, promptCount: 3, ago: ago, branch: 'master', empty: false };
+  }
+  function snap(ids) {
+    return {
+      view: 'board', glass: 'off',
+      stats: { projectCount: 0, sessionCount: ids.length, weekCount: 0 },
+      pulse: [0,0,0,0,0,0,0,0],
+      projects: [],
+      sessions: ids.map(function (p) { return session(p[0], p[1]); }),
+      claude: { installed: true },
+      errors: []
+    };
+  }
+  function send(payload) {
+    window.dispatchEvent(new MessageEvent('message', { data: { type: 'state', payload: payload } }));
+  }
+  function dump() {
+    return Array.prototype.map.call(document.querySelectorAll('.tl__i'), function (n) {
+      return n.dataset.id + '(' + n.querySelector('.tl__m span').textContent + ')';
+    }).join(' ');
+  }
+
+  var A = [['A','1 天前'],['B','2 天前'],['C','3 天前'],['D','4 天前'],['E','5 天前'],['F','6 天前']];
+  // E 和 C 有了新内容 → 应该跳到最前
+  var B = [['E','刚刚'],['C','刚刚'],['A','1 天前'],['B','2 天前'],['D','4 天前'],['F','6 天前']];
+  var C = [['E','刚刚'],['C','刚刚'],['A','1 天前'],['B','2 天前'],['D','4 天前'],['F','6 天前'],['G','刚刚']];
+
+  var log = [];
+  send(snap(A));
+  log.push('after1: ' + dump());
+  send(snap(B));
+  log.push('after2: ' + dump());
+  send(snap(C));
+  log.push('after3: ' + dump());
+  window.__log = log;
+  document.title = 'done';
+})();
+</script>
+</body>
+</html>

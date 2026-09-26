@@ -51,3 +51,28 @@ test('渲染器输出带状态编码的看板与可操作的会话节点', () =>
   assert.match(chinese, /<h1 class="topbar__title">任务面板<\/h1>/);
   assert.match(chinese, /<span class="lane__name">开发中<\/span>/);
 });
+
+// 抽屉是 main.js 用 querySelector 抓元素填内容的：选择器写错不会报错，
+// 只会在点开抽屉时抛 null 异常（和 0.1.1 修的那个 bug 同一类）。这里把
+// 「main.js 用到的抽屉选择器」和「渲染器真的产出了这些元素」钉在一起。
+test('预览抽屉产出 main.js 需要的全部挂载点', () => {
+  const window = {};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'media', 'views.js'), 'utf8'),
+    { window, T: (key) => key });
+
+  const html = window.renderDrawer();
+  const required = [
+    ['#drawer', /id="drawer"/],
+    ['#scrim', /id="scrim"/],
+    ['.drawer__t', /class="drawer__t"/],
+    ['.drawer__m', /class="drawer__m"/],
+    ['#dsec-prompt', /id="dsec-prompt"/],
+    ['#dsec-prompt .quote', /id="dsec-prompt"[^>]*>\s*<div class="dsec__l">[^<]*<\/div>\s*<div class="quote">/],
+    ['#dsec-reply .reply', /id="dsec-reply"[^>]*>\s*<div class="dsec__l">[^<]*<\/div>\s*<div class="reply">/],
+    ['#dsec-first .dfirst__t', /id="dsec-first"[\s\S]*?<span class="dfirst__t">/],
+    ['#drawer-open', /id="drawer-open"/]
+  ];
+
+  const missing = required.filter(([, pattern]) => !pattern.test(html)).map(([name]) => name);
+  assert.deepEqual(missing, [], `抽屉缺少 main.js 会去抓的挂载点：${missing.join(', ')}`);
+});

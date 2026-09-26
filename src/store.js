@@ -5,7 +5,12 @@ const path = require('node:path');
 const paths = require('./lib/paths');
 const sessionScanner = require('./lib/sessionScanner');
 const projectScanner = require('./lib/projectScanner');
-const { relativeTime } = require('./lib/format');
+const { relativeTime, truncate, plainify } = require('./lib/format');
+
+// 抽屉是 300px 宽的侧栏：提问给两行，结论给到能读完的程度（约 900 字）。
+const PROMPT_CHARS = 400;
+const REPLY_CHARS = 900;
+
 const { SessionCache } = require('./cache');
 const logger = require('./logger');
 const { t } = require('./i18n');
@@ -198,12 +203,16 @@ class BoardStore {
   async readPreview(id) {
     const session = this._sessions.find((item) => item.id === id);
     if (!session) return null;
-    const preview = await sessionScanner.readSessionPreview(session.file, { maxReplies: 3 });
+    const preview = await sessionScanner.readSessionPreview(session.file);
+    // 抽屉里的正文是 Markdown，先洗成纯文本再截断 —— 截断要按洗过的长度算，
+    // 否则 ** 和表格竖线会白占掉可见字符的额度。
+    const digest = (text, max) => truncate(plainify(text || ''), max);
     return {
       id: session.id,
       title: session.title,
-      firstPrompt: preview.firstPrompt,
-      lastReplies: preview.lastReplies,
+      firstPrompt: digest(preview.firstPrompt, PROMPT_CHARS),
+      lastPrompt: digest(preview.lastPrompt || preview.firstPrompt, PROMPT_CHARS),
+      lastReply: digest(preview.lastReply, REPLY_CHARS),
       meta: {
         ago: session.lastTs ? relativeTime(session.lastTs) : '',
         branch: session.gitBranch,

@@ -5,6 +5,10 @@ const path = require('node:path');
 const readline = require('node:readline');
 const { isRealPrompt, readPromptText, readUserContent } = require('./jsonl');
 
+function positive(value, fallback) {
+  return Number.isInteger(value) && value > 0 ? value : fallback;
+}
+
 async function scanSessionFile(filePath) {
   const absolutePath = path.resolve(filePath);
   let aiTitle = null;
@@ -129,13 +133,17 @@ async function scanProjectDir(dirPath, opts = {}) {
   });
 }
 
+// 预览回答「这个会话聊到哪了」，所以只取三样：开头那次提问、最后一次提问、
+// 最后一条助手文字（也就是这一轮的结论）。中间的碎话不要 —— 窄抽屉里读不完。
 async function readSessionPreview(filePath, opts = {}) {
-  const requestedReplies = opts.maxReplies ?? 3;
-  const maxReplies = Number.isInteger(requestedReplies) && requestedReplies > 0
-    ? requestedReplies
-    : 3;
+  const promptChars = positive(opts.maxPromptChars, 400);
+  // 这里的上限只是内存护栏，不是显示长度：真正决定「给用户看多少」的是
+  // store.readPreview 里 plainify 之后再截的那一刀。两个上限顺序不能颠倒 ——
+  // 先按原文字数截，会把「开头全是图片/表格线、正文在后面」的回复整条截没。
+  const replyChars = positive(opts.maxReplyChars, 20000);
   let firstPrompt = null;
-  const lastReplies = [];
+  let lastPrompt = null;
+  let lastReply = null;
   const input = fs.createReadStream(path.resolve(filePath), { encoding: 'utf8' });
   const lines = readline.createInterface({ input, crlfDelay: Infinity });
 
@@ -148,17 +156,18 @@ async function readSessionPreview(filePath, opts = {}) {
     }
     if (!record || typeof record !== 'object') continue;
 
-    if (firstPrompt === null && isRealPrompt(record)) {
-      firstPrompt = readPromptText(record).slice(0, 400);
+    if (isRealPrompt(record)) {
+      const text = readPromptText(record);
+      if (!text) continue;
+      if (firstPrompt === null) firstPrompt = text.slice(0, promptChars);
+      lastPrompt = text.slice(0, promptChars);
     } else if (record.type === 'assistant') {
       const text = readUserContent(record).trim();
-      if (!text) continue;
-      lastReplies.push(text.slice(0, 300));
-      if (lastReplies.length > maxReplies) lastReplies.shift();
+      if (text) lastReply = text.slice(0, replyChars);
     }
   }
 
-  return { firstPrompt, lastReplies };
+  return { firstPrompt, lastPrompt, lastReply };
 }
 
 module.exports = { scanSessionFile, scanProjectDir, readSessionPreview };

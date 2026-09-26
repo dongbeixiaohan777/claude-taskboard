@@ -35,9 +35,12 @@
       'action.preview': 'Preview',
       'action.close': 'Close',
       'drawer.aria': 'Session preview',
+      'drawer.lastPrompt': 'My last message',
+      'drawer.lastReply': 'The reply it ended on',
+      'drawer.firstPrompt': 'Opening message',
       'notice.noClaude': 'Claude Code extension not found — preview works, but sessions cannot be reopened.',
       'drawer.noPrompt': 'No user prompt to show.',
-      'drawer.noReplies': 'No assistant replies to show.',
+      'drawer.noReply': 'No assistant reply to show.',
       'notice.dismiss': 'Dismiss',
       'view.toggle': 'Switch view'
     },
@@ -74,9 +77,12 @@
       'action.preview': '预览',
       'action.close': '关闭',
       'drawer.aria': '会话预览',
+      'drawer.lastPrompt': '最后我说的话',
+      'drawer.lastReply': '最后的回复',
+      'drawer.firstPrompt': '开头那次提问',
       'notice.noClaude': '未检测到 Claude Code 扩展，只能预览、无法恢复会话。',
       'drawer.noPrompt': '没有可显示的真实提问。',
-      'drawer.noReplies': '没有可显示的助手回复。',
+      'drawer.noReply': '没有可显示的助手回复。',
       'notice.dismiss': '关闭提示',
       'view.toggle': '切换视图'
     }

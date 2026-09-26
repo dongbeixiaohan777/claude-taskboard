@@ -20,7 +20,8 @@ VS Code 侧边栏面板，把 **Claude Code 会话**和**项目文件夹**集中
 工作区里的每一次 Claude Code 对话，最新的在最上面。**节点大小 = 该会话的提问数**，
 话多的那些一眼就能看出来。
 
-- **点会话条目** → 弹出预览：首条提问 + 最后三条回复
+- **点会话条目** → 弹出预览，回答「这个会话聊到哪了」：你最后说的话 + 最后那条回复。
+  Markdown 会被洗成纯文本，在 300px 宽的侧栏里能直接读；开头那次提问压成一行小字
 - **点气泡按钮** → 在 Claude Code 扩展里重新打开那次对话。不用终端，不用复制会话 ID
 
 ### 工作脉搏
@@ -209,6 +210,9 @@ media/                 webview：style.css / glass.css / i18n.js / views.js / ma
 dev/preview.html       设计沙盘 —— 浏览器打开就能迭代视觉
 dev/shot.html          同上，但专供截图：中性演示数据、无沙盘工具栏
 dev/render-all.mjs     批量截图器（无头 Chrome，零依赖）
+dev/serve.mjs          给下面两个诊断页用的静态服务器
+dev/reorder-test.html  会话排序 —— 首屏渲染照不到的增量更新路径
+dev/drawer-test.html   预览抽屉，用合成 Markdown 看清洗效果
 docs/                  交给编码 agent 的任务书（大部分代码是它写的）
 ```
 

@@ -20,7 +20,9 @@ Everything is local. No account, no network calls, no telemetry.
 Every Claude Code conversation in your workspace, newest first. Node size encodes how many
 prompts the session had, so the heavy ones stand out.
 
-- **Click a session** → opens a preview: the first prompt plus the last three replies.
+- **Click a session** → opens a preview that answers "where did this get to?": your last
+  message, and the reply the session ended on. Markdown is flattened so it reads in a
+  300px panel, and the opening message stays as a one-line footnote.
 - **Click the speech-bubble button** → reopens that conversation inside the Claude Code
   extension. No terminal, no copy-pasting session IDs.
 
@@ -220,6 +222,9 @@ media/                 webview: style.css, glass.css, i18n.js, views.js, main.js
 dev/preview.html       design sandbox — open it in a browser to iterate on visuals
 dev/shot.html          same, but for screenshots: neutral demo data, no toolbar chrome
 dev/render-all.mjs     batch screenshot renderer (headless Chrome, zero dependencies)
+dev/serve.mjs          static server for the two diagnostic pages below
+dev/reorder-test.html  session reordering — the incremental-update path first render misses
+dev/drawer-test.html   preview drawer with synthetic Markdown
 docs/                  briefs handed to the coding agent that wrote most of this
 ```
 

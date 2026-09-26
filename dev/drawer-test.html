@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<!--
+  抽屉诊断页（开发期，不随扩展发布）。
+
+  为什么用合成数据而不是真实会话：抽屉里的正文来自会话记录，真实内容含项目名
+  和职业线索，落进仓库就是泄露。这里只需要「形状对」——标题、表格、加粗、链接、
+  代码块都有——就能看出洗 Markdown 的效果和排版。
+
+  先起 dev server（这页要调它的 /__digest），再打开：
+    node dev/serve.mjs
+    http://localhost:8791/dev/drawer-test.html?theme=dark&locale=zh-cn&empty=1
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>drawer test</title>
+<link rel="stylesheet" href="../media/style.css">
+<link rel="stylesheet" href="../media/glass.css">
+<style>
+  html, body { margin: 0; padding: 0; }
+  .frame {
+    width: 320px; height: 900px; display: flex; flex-direction: column;
+    overflow: hidden; background: var(--c-bg);
+  }
+  .frame .app { flex: 1; min-height: 0; position: relative; }
+  body.vscode-light {
+    --vscode-foreground: #333333; --vscode-descriptionForeground: #717171;
+    --vscode-sideBar-background: #F2F2F2; --vscode-widget-border: #d4d4d4;
+    --vscode-list-hoverBackground: #e0e0e0; --vscode-focusBorder: #9769dc;
+    --vscode-button-background: #705697; --vscode-button-foreground: #ffffff;
+    --vscode-button-hoverBackground: #8a6cb0;
+    --vscode-button-secondaryBackground: #dcdcdc;
+    --vscode-button-secondaryForeground: #333333;
+    --vscode-button-secondaryHoverBackground: #cfcfcf;
+  }
+  body.vscode-dark {
+    --vscode-foreground: #CCCCCC; --vscode-descriptionForeground: #9d9d9d;
+    --vscode-sideBar-background: #181818; --vscode-widget-border: #313131;
+    --vscode-list-hoverBackground: #2a2d2e; --vscode-focusBorder: #0078d4;
+    --vscode-button-background: #0078d4; --vscode-button-foreground: #ffffff;
+    --vscode-button-hoverBackground: #026ec1;
+    --vscode-button-secondaryBackground: #313131;
+    --vscode-button-secondaryForeground: #CCCCCC;
+    --vscode-button-secondaryHoverBackground: #3c3c3c;
+  }
+</style>
+</head>
+<body class="vscode-light">
+<div class="frame"><div id="root"></div></div>
+
+<script>
+window.acquireVsCodeApi = function () {
+  return { postMessage: function () {}, setState: function () {}, getState: function () { return null; } };
+};
+</script>
+<script src="../media/i18n.js"></script>
+<script src="../media/views.js"></script>
+<script src="../media/main.js"></script>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var theme = q.get('theme') || 'light';
+  var locale = q.get('locale') || 'zh-cn';
+  document.body.className = 'vscode-' + theme;
+  window.initI18n(locale);
+
+  // 合成正文：形状照抄一次真实汇报（标题 / 表格 / 加粗 / 链接 / 代码块 / 列表）
+  var REPLY = [
+    '## 网站已经上线了',
+    '',
+    '# https://demo.example.com/',
+    '',
+    '线上实测全部通过：',
+    '',
+    '| 检查项 | 结果 |',
+    '|---|---|',
+    '| 首页渲染 | ✅ 3 个项目、深色底正确 |',
+    '| 三个详情页 | ✅ 全部能打开，正文表格正常 |',
+    '| 手机端 | ✅ 无横向溢出 |',
+    '',
+    '**先更正我自己一个错**：我上一轮看到 `/dashboard.html` 返回 200 就报警说工作台泄露了。',
+    '那是我偷懒——只看状态码没看内容。实际抓下来一看，返回的是首页，托管商对不存在的路径做了兜底。',
+    '**你的工作台一个字都没有上去。**',
+    '',
+    '## 你现在的工作流',
+    '',
+    '改内容 → `git push` → 30 秒后线上更新。或者直接在网页上改文件、点 Commit。',
+    '',
+    '- 文案都在 `content/*.md` 里，用 Obsidian 打开就能写',
+    '- 详见 [交接文档](https://example.com/handover)',
+    '',
+    '```bash',
+    'git add -A && git commit -m "update" && git push',
+    '```'
+  ].join('\n');
+
+  // 走本机 dev server 的 /__digest：调用扩展侧真实的 plainify + truncate，
+  // 保证这页看到的就是真机上要显示的文字（不要在页面里手写一份副本）。
+  function digest(text, max) {
+    return fetch('/__digest', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text: text, max: max })
+    }).then(function (response) { return response.json(); })
+      .then(function (data) { return data.text; });
+  }
+
+  var snapshot = {
+    view: 'board', glass: 'off',
+    stats: { projectCount: 0, sessionCount: 1, weekCount: 0 },
+    pulse: [0, 0, 0, 0, 0, 0, 0, 1],
+    projects: [],
+    sessions: [{ id: 's1', title: '个人作品集网站', promptCount: 25, ago: '3 天前', branch: 'master', empty: false }],
+    claude: { installed: true },
+    errors: []
+  };
+  function post(type, payload) {
+    window.dispatchEvent(new MessageEvent('message', { data: { type: type, payload: payload } }));
+  }
+  post('state', snapshot);
+  void digest(REPLY, 900).then(function (reply) {
+    post('preview', {
+      id: 's1',
+      title: '个人作品集网站',
+      firstPrompt: '把这三个项目的文档整理成一个个人网站，能公开给别人的那种',
+      lastPrompt: 'demo.example.com 这个域名现在能访问了吗？顺便把工作台入口藏掉。',
+      lastReply: q.get('empty') ? '' : reply,
+      meta: { ago: '3 天前', branch: 'master', promptCount: 25, models: ['claude-sonnet-4-5'] }
+    });
+  });
+})();
+</script>
+</body>
+</html>

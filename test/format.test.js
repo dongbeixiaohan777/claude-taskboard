@@ -2,7 +2,7 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { relativeTime, absoluteTime, formatSize, truncate } = require('../src/lib/format');
+const { relativeTime, absoluteTime, formatSize, truncate, plainify } = require('../src/lib/format');
 const i18n = require('../src/i18n');
 
 test('相对时间按分钟、小时、昨天和日期分段', () => {
@@ -28,4 +28,52 @@ test('绝对时间使用本地时区，大小和截断格式正确', () => {
   assert.strictEqual(formatSize(1258291), '1.2 MB');
   assert.strictEqual(truncate('abcdef', 4), 'abc…');
   assert.strictEqual(truncate('短文本', 4), '短文本');
+});
+
+test('Markdown 洗成窄面板能读的纯文本', () => {
+  const source = [
+    '## 现在的状态',
+    '',
+    '| | 状态 |',
+    '|---|---|',
+    '| 个体户 | 跑着 |',
+    '',
+    '**重点**：看 [清单](https://example.com/a) 和 `npm run dev`。',
+    '',
+    '- 第一项',
+    '- 第二项',
+    '',
+    '```bash',
+    'git push',
+    '```'
+  ].join('\n');
+
+  assert.strictEqual(plainify(source), [
+    '现在的状态',
+    '',
+    '状态',
+    '个体户 · 跑着',
+    '',
+    '重点：看 清单 和 npm run dev。',
+    '',
+    '• 第一项',
+    '• 第二项',
+    '',
+    'git push'
+  ].join('\n'));
+});
+
+test('Markdown 清洗不吞内容也不留下 HTML 危险字符', () => {
+  // 表格首行没有表头分隔行时也要保留
+  assert.strictEqual(plainify('| a | b |'), 'a · b');
+  // 图片整段去掉、引用去符号
+  assert.strictEqual(plainify('![图](x.png) > 引用'), '引用');
+  assert.strictEqual(plainify('> 引用\n>> 更深'), '引用\n更深');
+  // 分隔线消失，但普通破折号行不受影响
+  assert.strictEqual(plainify('---\n-----\n好'), '好');
+  assert.strictEqual(plainify('2026-09-25 上线'), '2026-09-25 上线');
+  // 不产出 HTML：标签原样保留为文字，由 webview 的 textContent 负责不解析
+  assert.strictEqual(plainify('<b>粗</b>'), '<b>粗</b>');
+  assert.strictEqual(plainify(null), '');
+  assert.strictEqual(plainify('  \n\n  '), '');
 });

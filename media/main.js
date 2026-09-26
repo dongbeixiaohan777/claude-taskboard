@@ -272,7 +272,7 @@
     node.dataset.id = session.id;
     node.toggleAttribute('data-empty', Boolean(session.empty));
     setStyle(node, '--st', session.empty ? 'var(--c-dim)' : 'var(--st-dev)');
-    setStyle(node, '--node', nodeSize(session.promptCount));
+    setStyle(node, '--node', window.nodeSize(session.promptCount));
     setStyle(node, '--i', String(Math.min(index, 12)));
 
     const actions = node.querySelector('.card__act');
@@ -394,6 +394,14 @@
     });
   }
 
+  function fillSection(id, text, emptyText) {
+    const section = root.querySelector('#' + id);
+    const body = section.querySelector('.quote, .reply');
+    const hasText = Boolean(text);
+    body.textContent = hasText ? text : emptyText;
+    section.toggleAttribute('data-empty', !hasText);
+  }
+
   function openPreview(payload) {
     const drawer = root.querySelector('#drawer');
     const meta = payload.meta || {};
@@ -403,23 +411,18 @@
     details.push(T('unit.prompts', Number(meta.promptCount) || 0));
     if (meta.branch) details.push(meta.branch);
     appendMetaValues(root.querySelector('.drawer__m'), details);
-    root.querySelector('.quote').textContent = payload.firstPrompt || T('drawer.noPrompt');
 
-    const body = root.querySelector('.drawer__body');
-    Array.from(body.children).slice(1).forEach((node) => node.remove());
-    const values = asArray(payload.lastReplies);
-    if (!values.length) {
-      const empty = document.createElement('div');
-      empty.className = 'empty__d';
-      empty.textContent = T('drawer.noReplies');
-      body.appendChild(empty);
-    } else {
-      values.forEach((reply) => {
-        const item = document.createElement('div');
-        item.className = 'reply';
-        item.textContent = reply;
-        body.appendChild(item);
-      });
+    fillSection('dsec-prompt', payload.lastPrompt, T('drawer.noPrompt'));
+    fillSection('dsec-reply', payload.lastReply, T('drawer.noReply'));
+
+    // 只有一次提问的会话，开头那行和「最后我说的话」是同一句，重复显示没意义
+    const first = root.querySelector('#dsec-first');
+    const showFirst = Boolean(payload.firstPrompt) && payload.firstPrompt !== payload.lastPrompt;
+    first.hidden = !showFirst;
+    if (showFirst) {
+      const text = first.querySelector('.dfirst__t');
+      text.textContent = payload.firstPrompt;
+      text.title = payload.firstPrompt;
     }
 
     const openButton = root.querySelector('#drawer-open');

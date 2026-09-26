@@ -2,7 +2,7 @@
   "name": "claude-taskboard",
   "displayName": "Claude Taskboard",
   "description": "A sidebar panel for your projects and Claude Code sessions: see what's alive, where your time went, and jump back to any past conversation.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "dongbeixiaohan777",
   "license": "MIT",
   "private": false,
